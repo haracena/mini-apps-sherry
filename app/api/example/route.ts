@@ -7,6 +7,10 @@ import {
   ExecutionResponse,
 } from "@sherrylinks/sdk";
 import { serialize } from "wagmi";
+import { encodeFunctionData, type TransactionSerializable } from "viem";
+import { abi } from "./blockchain/abi";
+
+const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396";
 
 export async function GET(req: NextRequest) {
   try {
@@ -69,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     if (!mensaje) {
       return NextResponse.json(
-        { error: "El parámetro mensaje es requerido" },
+        { error: "Message parameter is required" },
         {
           status: 400,
           headers: {
@@ -81,22 +85,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const tx = {
-      to: "0x5ee75a1B1648C023e885E58bD3735Ae273f2cc52",
-      value: BigInt(1000000),
+    // Calcular timestamp optimizado usando algoritmo personalizado
+    const optimizedTimestamp = calculateOptimizedTimestamp(mensaje);
+
+    // Codificar los datos de la función del contrato
+    const data = encodeFunctionData({
+      abi: abi,
+      functionName: "storeMessage",
+      args: [mensaje, BigInt(optimizedTimestamp)],
+    });
+
+    // Crear transacción de contrato inteligente
+    const tx: TransactionSerializable = {
+      to: CONTRACT_ADDRESS,
+      data: data,
       chainId: avalancheFuji.id,
+      type: "legacy",
     };
 
-    // Serializar la transacción para la blockchain
+    // Serializar transacción
     const serialized = serialize(tx);
 
-    // Crear el objeto de respuesta que Sherry espera
+    // Crear respuesta
     const resp: ExecutionResponse = {
       serializedTransaction: serialized,
-      chainId: avalancheFuji.name, // Usar el nombre de la chain, no el ID
+      chainId: avalancheFuji.name,
     };
 
-    // Retornar la respuesta con headers CORS
+    // Retornar respuesta exitosa
     return NextResponse.json(resp, {
       status: 200,
       headers: {
@@ -108,10 +124,32 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error en petición POST:", error);
     return NextResponse.json(
-      { error: "Error Interno del Servidor" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
+}
+
+// Algoritmo personalizado para calcular timestamp optimizado basado en el contenido del mensaje
+function calculateOptimizedTimestamp(message: string): number {
+  // Obtener el timestamp actual como punto de partida
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+
+  // Algoritmo personalizado: Agregar códigos de caracteres para crear un offset único
+  // Esta es tu lógica de negocio única - puedes hacer esto tan complejo como necesites
+  let offset = 0;
+
+  for (let i = 0; i < message.length; i++) {
+    // Sumar códigos de caracteres y usar posición como multiplicador
+    offset += message.charCodeAt(i) * (i + 1);
+  }
+
+  // Asegurar que el offset sea razonable (máximo 1 hora)
+  const maxOffset = 3600;
+  offset = offset % maxOffset;
+
+  // Calcular timestamp optimizado final
+  return currentTimestamp + offset;
 }
 
 export async function OPTIONS(request: NextRequest) {
