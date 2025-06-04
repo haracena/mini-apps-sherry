@@ -7,7 +7,7 @@ import {
   ExecutionResponse,
 } from "@sherrylinks/sdk";
 import { serialize } from "wagmi";
-import { encodeFunctionData, type TransactionSerializable } from "viem";
+import { encodeFunctionData, TransactionSerializable } from "viem";
 import { abi } from "./blockchain/abi";
 
 const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396";
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
           description:
             "Almacena tu mensaje con un timestamp personalizado calculado para almacenamiento óptimo",
           chains: { source: "fuji" },
-          path: `/api/mi-app`,
+          path: `/api/example`,
           params: [
             {
               name: "mensaje",
