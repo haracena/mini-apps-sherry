@@ -152,6 +152,7 @@ function calculateOptimizedTimestamp(message: string): number {
   return currentTimestamp + offset;
 }
 
+// Test commit for GitHub authentication
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 204, // Sin Contenido
