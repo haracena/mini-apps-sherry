@@ -46,7 +46,7 @@ export default function HeroSection() {
         <div className="flex justify-center items-center">
           <TiltFrame>
             <Image
-              src="/assets/images/miniapp-example.png"
+              src="/assets/images/miniapp-example.webp"
               alt="Hero"
               width={350}
               height={470}
