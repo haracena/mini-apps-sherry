@@ -15,6 +15,10 @@ export async function GET(req: NextRequest) {
     const host = req.headers.get("host") || "localhost:3000";
     const protocol = req.headers.get("x-forwarded-proto") || "http";
     const serverUrl = `${protocol}://${host}`;
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    console.log(id);
 
     const metadata: Metadata = {
       url: "https://sherry.social",
@@ -31,44 +35,18 @@ export async function GET(req: NextRequest) {
           path: `/api/discord`,
           params: [
             {
-              name: "subscription_time",
-              label: "Subscription time",
-              type: "radio",
-              options: [
-                {
-                  label: "1 month",
-                  value: 1,
-                },
-                {
-                  label: "3 months",
-                  value: 3,
-                },
-                {
-                  label: "1 year",
-                  value: 12,
-                },
-              ],
-            },
-            {
-              name: "discord_id",
-              label: "Discord ID",
+              name: "discord_token",
+              label: "Discord Token",
               type: "text",
               required: true,
-              description: "Enter your Discord ID not username",
+              description: "Enter your Discord Token",
             },
             {
-              name: "message",
-              label: "Message (optional)",
-              type: "text",
-              required: false,
-              description: "Send your greeting message",
-            },
-            {
-              name: "referral_address",
-              label: "Referral address (optional)",
-              type: "address",
-              required: false,
-              description: "Enter the referral address",
+              name: "price",
+              label: "Invitation price",
+              type: "",
+              required: true,
+              description: "Enter the invitation price",
             },
           ],
         },
@@ -95,11 +73,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const discordId = searchParams.get("discord_id");
+    const discordToken = searchParams.get("discord_token");
     const subscriptionTime = searchParams.get("subscription_time");
     const message = searchParams.get("message");
     const referralAddress = searchParams.get("referral_address");
-    console.log(discordId, subscriptionTime, message, referralAddress);
+    console.log(discordToken, subscriptionTime, message, referralAddress);
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
