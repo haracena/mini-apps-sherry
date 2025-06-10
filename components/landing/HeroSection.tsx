@@ -8,7 +8,7 @@ export default function HeroSection() {
   return (
     <header className="relative min-h-screen">
       <Image
-        src="/assets/images/hero-bg.png"
+        src="/assets/images/hero-bg.webp"
         alt="Hero"
         width={1512}
         height={982}
