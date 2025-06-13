@@ -1,11 +1,14 @@
+"use client";
 import Image from "next/image";
 import TiltFrame from "./TiltFrame";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import Steps from "./Steps";
 import TelegramLogin from "../TelegramLogin";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function HeroSection() {
+  const user = useAuthStore((state) => state.user);
   return (
     <header className="relative min-h-screen">
       <Image
@@ -23,7 +26,16 @@ export default function HeroSection() {
           <p className="text-neutral-500 text-2xl mb-4">
             Automatize yor private telegram group with mini apps on avalanche.
           </p>
-          <TelegramLogin />
+          {user ? (
+            <Link
+              className="w-fit cursor-pointer hover:-translate-y-1 duration-300"
+              href="/dashboard"
+            >
+              <Button className="w-fit cursor-pointer">Go to dashboard</Button>
+            </Link>
+          ) : (
+            <TelegramLogin />
+          )}
           <p className="text-neutral-500 font-medium mt-12">Built on</p>
           <div className="flex gap-4">
             <Image

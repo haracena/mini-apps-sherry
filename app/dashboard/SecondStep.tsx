@@ -19,6 +19,7 @@ import { useParams } from "next/navigation";
 import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
 import { Contract, BrowserProvider, parseEther } from "ethers";
 import { useWallet } from "@/hooks/useWallet";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -209,7 +210,22 @@ export default function SecondStep({
       }
       setSuccess(true);
       setOriginalValues(values);
-      alert("Grupo creado en blockchain. Tx: " + txHash);
+      toast.success("Grupo creado en blockchain", {
+        description: (
+          <span>
+            Tx:{" "}
+            <a
+              href={`https://testnet.snowtrace.io/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500"
+            >
+              {txHash.slice(0, 10)}...
+            </a>
+          </span>
+        ),
+        duration: 8000,
+      });
       methods.next();
     } catch (err: any) {
       setError(err.message || "Unknown error");
