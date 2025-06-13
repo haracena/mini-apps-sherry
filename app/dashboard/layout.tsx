@@ -17,7 +17,7 @@ export default function DashboardLayout({
       />
       <h1 className="text-4xl font-bold mb-4 mt-4">Dashboard</h1>
       <div className="grid grid-cols-[280px_1fr] min-h-[75vh] rounded-lg overflow-hidden">
-        <div className="flex flex-col gap-4 p-4 bg-neutral-900/90">
+        <div className="flex flex-col gap-4 p-4 bg-neutral-900/75">
           <div className="flex flex-col gap-2">
             <p className="text-sm text-neutral-500">Your mini apps</p>
           </div>
