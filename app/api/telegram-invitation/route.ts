@@ -148,6 +148,41 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Validar que no exista un registro con el mismo email y group_id
+    const { data: existingInvitation, error: checkError } = await supabase
+      .from("telegram_invitations")
+      .select()
+      .eq("group_id", group_id)
+      .eq("email", email)
+      .single();
+
+    if (existingInvitation) {
+      return NextResponse.json(
+        { error: "This email already has a pending invitation for this group" },
+        { status: 400 }
+      );
+    }
+
+    // Crear el registro en la base de datos
+    const { error: insertError } = await supabase
+      .from("telegram_invitations")
+      .insert([
+        {
+          group_id,
+          email,
+          referral,
+          status: "pending",
+        },
+      ]);
+
+    if (insertError) {
+      return NextResponse.json(
+        { error: "Failed to create invitation record" },
+        { status: 500 }
+      );
+    }
+
     // Codificar los datos de la función del contrato
     const args = [
       group_id,

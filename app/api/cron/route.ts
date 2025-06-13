@@ -4,7 +4,6 @@ import { avalancheFuji } from "viem/chains";
 import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
 import type { AbiEvent } from "viem";
 
-// Usa tu endpoint de Alchemy aquí
 const publicClient = createPublicClient({
   chain: avalancheFuji,
   transport: http(process.env.ALCHEMY_RPC_URL!),
