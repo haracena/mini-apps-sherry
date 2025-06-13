@@ -15,7 +15,10 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-neutral-950/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link className="duration-300 transition-all hover:opacity-80" href="/">
+        <Link
+          className="duration-300 transition-all active:scale-95 hover:opacity-80"
+          href="/"
+        >
           <Image
             src="/assets/images/logo-large.png"
             alt="Logo"
@@ -41,7 +44,10 @@ export default function Navbar() {
               )}
               <button
                 className="ml-2 px-3 py-1 rounded flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-sm"
-                onClick={() => setUser(null)}
+                onClick={() => {
+                  setUser(null);
+                  router.push("/");
+                }}
               >
                 Logout
                 <LogOutIcon className="size-3" />

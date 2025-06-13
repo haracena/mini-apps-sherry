@@ -105,6 +105,58 @@ async function createGroupOnChain({
   return tx.hash;
 }
 
+async function getGroupOnChain(groupId: string) {
+  if (!(window as any).ethereum) throw new Error("MetaMask not found");
+  const provider = new BrowserProvider((window as any).ethereum, {
+    name: "avalanche-fuji",
+    chainId: 43113,
+  });
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    TelegramGroupInvitationABI,
+    provider
+  );
+  const group = await contract.getGroup(groupId);
+  // group: [owner, price, referralCommission, exists]
+  return {
+    owner: group[0],
+    price: group[1],
+    referralCommission: group[2],
+    exists: Boolean(group[3]),
+  };
+}
+
+async function updateGroupOnChain({
+  groupId,
+  price, // en AVAX
+  referralCommission,
+}: {
+  groupId: string;
+  price: number;
+  referralCommission: number;
+}) {
+  if (!(window as any).ethereum) throw new Error("MetaMask not found");
+  await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+  const provider = new BrowserProvider((window as any).ethereum, {
+    name: "avalanche-fuji",
+    chainId: 43113,
+  });
+  const signer = await provider.getSigner();
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    TelegramGroupInvitationABI,
+    signer
+  );
+  const priceInWei = parseEther(price.toString());
+  const tx = await contract.updateGroup(
+    groupId,
+    priceInWei,
+    referralCommission
+  );
+  await tx.wait();
+  return tx.hash;
+}
+
 export default function SecondStep({
   methods,
   setCurrentStep,
@@ -186,13 +238,30 @@ export default function SecondStep({
         methods.next();
         return;
       }
-      // 1. Crear grupo en el smart contract
-      const txHash = await createGroupOnChain({
-        groupId: group_id,
-        price: values.invitationPrice,
-        referralCommission: values.referralCommission ?? 0,
-      });
-      // 2. Actualizar en Supabase
+      // 1. Consultar si el grupo existe en el contrato
+      const group = await getGroupOnChain(group_id);
+      let txHash: string | undefined = undefined;
+      if (!group.exists) {
+        // Crear grupo en el smart contract
+        txHash = await createGroupOnChain({
+          groupId: group_id,
+          price: values.invitationPrice,
+          referralCommission: values.referralCommission ?? 0,
+        });
+      } else {
+        // Detectar si cambiaron los campos on-chain
+        const onChainChanged =
+          values.invitationPrice !== Number(group.price) / 1e18 ||
+          values.referralCommission !== Number(group.referralCommission);
+        if (onChainChanged) {
+          txHash = await updateGroupOnChain({
+            groupId: group_id,
+            price: values.invitationPrice,
+            referralCommission: values.referralCommission ?? 0,
+          });
+        }
+      }
+      // 2. Actualizar en Supabase (siempre)
       const res = await fetch(`/api/telegram-invitation-configs/${group_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -210,22 +279,24 @@ export default function SecondStep({
       }
       setSuccess(true);
       setOriginalValues(values);
-      toast.success("Grupo creado en blockchain", {
-        description: (
-          <span>
-            Tx:{" "}
-            <a
-              href={`https://testnet.snowtrace.io/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-500"
-            >
-              {txHash.slice(0, 10)}...
-            </a>
-          </span>
-        ),
-        duration: 8000,
-      });
+      if (txHash) {
+        toast.success("Group updated on blockchain", {
+          description: (
+            <span>
+              Tx:{" "}
+              <a
+                href={`https://testnet.snowtrace.io/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-blue-500"
+              >
+                {txHash.slice(0, 10)}...
+              </a>
+            </span>
+          ),
+          duration: 8000,
+        });
+      }
       methods.next();
     } catch (err: any) {
       setError(err.message || "Unknown error");

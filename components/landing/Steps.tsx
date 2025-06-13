@@ -1,32 +1,41 @@
-import { UserCheck, Blocks, Share2 } from "lucide-react";
+import {
+  UserCheck,
+  Blocks,
+  Share2,
+  DollarSign,
+  Settings,
+  UserPlus,
+} from "lucide-react";
 
 export default function Steps() {
   return (
     <section className="max-w-7xl mx-auto px-4 grid grid-cols-3 gap-4">
       <div className="grid grid-cols-[auto_1fr] gap-4">
-        <UserCheck className="size-8 text-neutral-50" />
+        <UserPlus className="size-8 text-neutral-50" />
         <div className="flex flex-col gap-2">
-          <h3 className="text-2xl font-bold">Create your mini app</h3>
+          <h3 className="text-2xl font-bold">Connect your Telegram group</h3>
           <p className="text-neutral-400">
-            Create your mini app with our easy to use editor.
+            Add the bot and link your group to get started.
           </p>
         </div>
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-4">
-        <Blocks className="size-8 text-neutral-50" />
+        <Settings className="size-8 text-neutral-50" />
         <div className="flex flex-col gap-2">
-          <h3 className="text-2xl font-bold">Create your mini app</h3>
+          <h3 className="text-2xl font-bold">Configure your mini app</h3>
           <p className="text-neutral-400">
-            Create your mini app with our easy to use editor.
+            Set the title, description, invitation price, and referral
+            commission.
           </p>
         </div>
       </div>
       <div className="grid grid-cols-[auto_1fr] gap-4">
-        <Share2 className="size-8 text-neutral-50" />
+        <DollarSign className="size-8 text-neutral-50" />
         <div className="flex flex-col gap-2">
-          <h3 className="text-2xl font-bold">Create your mini app</h3>
+          <h3 className="text-2xl font-bold">Sell your invitation link</h3>
           <p className="text-neutral-400">
-            Create your mini app with our easy to use editor.
+            Share your unique link and start earning by selling access to your
+            private Telegram group.
           </p>
         </div>
       </div>

@@ -23,7 +23,7 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://mini-apps-sherry.vercel.app/api/telegram-mini-app/${group_id}`;
+  const shareUrl = `https://mini-apps-sherry.vercel.app/api/telegram-invitation?group_id=${group_id}`;
 
   useEffect(() => {
     setCurrentStep(2);
@@ -54,7 +54,9 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-8">Configure your mini app</h2>
+      <h2 className="text-2xl font-bold mb-8">
+        Your mini app is ready to use!
+      </h2>
       {loading ? (
         <div className="py-8 text-center text-neutral-400">
           Loading group config...
@@ -64,32 +66,41 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
       ) : (
         <div className="space-y-4">
           <div>
-            <span className="font-semibold">Title:</span> {data.title}
+            <span className="font-semibold">Title:</span>{" "}
+            <span className="text-neutral-400 font-normal">{data.title}</span>
           </div>
           <div>
             <span className="font-semibold">Description:</span>{" "}
-            {data.description}
+            <span className="text-neutral-400 font-normal">
+              {data.description}
+            </span>
           </div>
           <div>
             <span className="font-semibold">Owner wallet:</span>{" "}
-            {data.owner_address}
+            <span className="text-neutral-400 font-normal">
+              {data.owner_address}
+            </span>
           </div>
-          <div>
-            <span className="font-semibold">Invitation Price:</span>{" "}
-            {data.invitation_price} AVAX
+          <div className="flex items-center flex-wrap gap-4">
+            <div>
+              <span className="font-semibold">Invitation Price:</span>{" "}
+              <span className="text-neutral-400 font-normal">
+                {data.invitation_price} AVAX
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold">Referral Commission:</span>{" "}
+              <span className="text-neutral-400 font-normal">
+                {data.referralCommission ?? 0}%
+              </span>
+            </div>
+
+            <span className="font-semibold">
+              Platform Commission:{" "}
+              <span className="text-neutral-400 font-normal">0.01 AVAX</span>
+            </span>
           </div>
-          <div>
-            <span className="font-semibold">Referral Commission:</span>{" "}
-            {data.referralCommission ?? 0}%
-          </div>
-          <div>
-            <span className="font-semibold">Profit for creator:</span>{" "}
-            {(
-              data.invitation_price -
-              data.invitation_price * ((data.referralCommission ?? 0) / 100)
-            ).toFixed(2)}{" "}
-            AVAX
-          </div>
+
           <div className="mt-8">
             <div className="mb-2 font-semibold flex items-center gap-2">
               Share your link!{" "}

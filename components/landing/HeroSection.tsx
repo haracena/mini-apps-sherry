@@ -20,11 +20,12 @@ export default function HeroSection() {
       />
       <div className="max-w-7xl mx-auto px-4 py-32 grid grid-cols-2 gap-4">
         <div className="text-pretty flex flex-col gap-4">
-          <h1 className="text-6xl font-bold text-white">
-            Create Telegram invitation links
+          <h1 className="text-5xl font-bold text-white">
+            Unlock Private Telegram Groups with Blockchain
           </h1>
-          <p className="text-neutral-500 text-2xl mb-4">
-            Automatize yor private telegram group with mini apps on avalanche.
+          <p className="text-neutral-500 text-xl mb-4">
+            Automate access, monetize your community, and manage invitations
+            securely with Avalanche-powered mini apps.
           </p>
           {user ? (
             <Link
@@ -54,14 +55,21 @@ export default function HeroSection() {
             />
           </div>
         </div>
-        <div className="flex justify-center items-center">
+        <div className="flex justify-end items-center">
           <TiltFrame>
+            <Image
+              src="/assets/images/miniapp-example2.webp"
+              alt="Hero"
+              width={350}
+              height={470}
+              className="rounded-lg"
+            />
             <Image
               src="/assets/images/miniapp-example.webp"
               alt="Hero"
               width={350}
               height={470}
-              className="rounded-lg"
+              className="rounded-lg absolute top-0 left-0 inset-0 opacity-100 group-hover:opacity-0 transition-opacity duration-[600ms]"
             />
           </TiltFrame>
         </div>

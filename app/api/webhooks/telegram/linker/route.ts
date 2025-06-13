@@ -7,6 +7,24 @@ function extractGroupId(text: string): string | null {
   return parts[1];
 }
 
+async function sendTelegramMessage(chatId: string, text: string) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    console.error("TELEGRAM_BOT_TOKEN not set");
+    return;
+  }
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "Markdown",
+    }),
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -30,6 +48,20 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // Validar que no exista ya un registro con el mismo group_id
+      const { data: existing, error: fetchError } = await supabaseServiceRole
+        .from("telegram_invitation_configs")
+        .select()
+        .eq("group_id", groupId)
+        .single();
+      if (existing) {
+        await sendTelegramMessage(
+          chat.id.toString(),
+          "❗️This group is already linked to a mini app."
+        );
+        return new Response("Group already linked", { status: 200 });
+      }
+
       const { data, error } = await supabaseServiceRole
         .from("telegram_invitation_configs")
         .insert([
@@ -47,6 +79,10 @@ export async function POST(req: NextRequest) {
         return new Response("Error linking group", { status: 500 });
       }
 
+      await sendTelegramMessage(
+        chat.id.toString(),
+        "✅ Group successfully linked to your mini app!"
+      );
       return new Response("Group linked ✅", { status: 200 });
     }
 
