@@ -13,20 +13,18 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-2">
+              <span className="text-sm">
+                {user.first_name} {user.last_name}
+              </span>
               {user.photo_url && (
                 <img
                   src={user.photo_url}
                   alt={user.first_name}
-                  className="w-8 h-8 rounded-full"
+                  className="size-6 rounded-full"
                 />
               )}
-              <span className="text-sm">
-                {user.first_name} {user.last_name}
-              </span>
             </div>
-          ) : (
-            <TelegramLogin />
-          )}
+          ) : null}
         </div>
       </div>
     </nav>

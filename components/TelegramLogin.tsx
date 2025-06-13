@@ -1,6 +1,7 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -13,9 +14,14 @@ declare global {
 
 export default function TelegramLogin() {
   const setUser = useAuthStore((state) => state.setUser);
-
+  const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   useEffect(() => {
-    // Load Telegram Login Widget script
+    // Remove previous widget if exists
+    if (containerRef.current) {
+      containerRef.current.innerHTML = "";
+    }
+
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", "MiniAppsBlockchainBot"); // Replace with your bot name
@@ -28,15 +34,21 @@ export default function TelegramLogin() {
 
     // Define the callback function
     window.onTelegramAuth = (user: any) => {
+      console.log(user);
       setUser(user);
+      if (user) router.push("/dashboard");
     };
 
-    document.body.appendChild(script);
+    if (containerRef.current) {
+      containerRef.current.appendChild(script);
+    }
 
     return () => {
-      document.body.removeChild(script);
+      if (containerRef.current) {
+        containerRef.current.innerHTML = "";
+      }
     };
   }, [setUser]);
 
-  return <div id="telegram-login-container" />;
+  return <div ref={containerRef} />;
 }

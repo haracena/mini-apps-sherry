@@ -3,6 +3,7 @@ import TiltFrame from "./TiltFrame";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import Steps from "./Steps";
+import TelegramLogin from "../TelegramLogin";
 
 export default function HeroSection() {
   return (
@@ -19,12 +20,10 @@ export default function HeroSection() {
           <h1 className="text-6xl font-bold text-white">
             Create Telegram invitation links
           </h1>
-          <p className="text-neutral-500 text-2xl">
+          <p className="text-neutral-500 text-2xl mb-4">
             Automatize yor private telegram group with mini apps on avalanche.
           </p>
-          <Link className="mt-4" href="/">
-            <Button className="cursor-pointer">Create your mini app</Button>
-          </Link>
+          <TelegramLogin />
           <p className="text-neutral-500 font-medium mt-12">Built on</p>
           <div className="flex gap-4">
             <Image
