@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Copy } from "lucide-react";
+import { CopyInput } from "@/components/ui/CopyInput";
 
 interface FirstStepProps {
   methods: any;
@@ -70,7 +71,7 @@ export default function FirstStep({ methods, setCurrentStep }: FirstStepProps) {
 
       <h2 className="text-2xl font-bold mt-4">Link your group</h2>
       <p>After you added mini app bot type in your group chat</p>
-      <p className="text-indigo-500 font-bold">/linkgroup {id}</p>
+      <CopyInput value={`/linkgroup ${id}`} />
       <h2 className="text-2xl font-bold mt-4">Check group connection</h2>
       <div className="flex gap-4 items-center">
         <Button

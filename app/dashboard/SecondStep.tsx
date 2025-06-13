@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
+import { Contract, BrowserProvider, parseEther } from "ethers";
+import { useWallet } from "@/hooks/useWallet";
 
 const formSchema = z
   .object({
@@ -68,6 +71,39 @@ interface SecondStepProps {
   setCurrentStep: (step: number) => void;
 }
 
+const CONTRACT_ADDRESS = "0x6aC5052432CDdb9Ff4F1b39DA03CA133dBCd8DcF"; // Reemplaza por tu address real
+
+async function createGroupOnChain({
+  groupId,
+  price, // en AVAX
+  referralCommission,
+}: {
+  groupId: string;
+  price: number;
+  referralCommission: number;
+}) {
+  if (!(window as any).ethereum) throw new Error("MetaMask not found");
+  await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+  const provider = new BrowserProvider((window as any).ethereum, {
+    name: "avalanche-fuji",
+    chainId: 43113,
+  });
+  const signer = await provider.getSigner();
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    TelegramGroupInvitationABI,
+    signer
+  );
+  const priceInWei = parseEther(price.toString());
+  const tx = await contract.createGroup(
+    groupId,
+    priceInWei,
+    referralCommission
+  );
+  await tx.wait();
+  return tx.hash;
+}
+
 export default function SecondStep({
   methods,
   setCurrentStep,
@@ -84,6 +120,7 @@ export default function SecondStep({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
+  const { address, connect, connecting, error: walletError } = useWallet();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -96,6 +133,12 @@ export default function SecondStep({
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    if (address) {
+      form.setValue("ownerAddress", address, { shouldValidate: true });
+    }
+  }, [address, form]);
 
   async function fetchData() {
     setFetching(true);
@@ -142,6 +185,13 @@ export default function SecondStep({
         methods.next();
         return;
       }
+      // 1. Crear grupo en el smart contract
+      const txHash = await createGroupOnChain({
+        groupId: group_id,
+        price: values.invitationPrice,
+        referralCommission: values.referralCommission ?? 0,
+      });
+      // 2. Actualizar en Supabase
       const res = await fetch(`/api/telegram-invitation-configs/${group_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -159,6 +209,7 @@ export default function SecondStep({
       }
       setSuccess(true);
       setOriginalValues(values);
+      alert("Grupo creado en blockchain. Tx: " + txHash);
       methods.next();
     } catch (err: any) {
       setError(err.message || "Unknown error");
@@ -224,13 +275,32 @@ export default function SecondStep({
                 <FormItem>
                   <FormLabel>Owner wallet address</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="0x..."
-                      {...field}
-                      className="font-mono"
-                    />
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        {...field}
+                        className="font-mono"
+                        placeholder="0x..."
+                        value={address || field.value}
+                        readOnly
+                      />
+                      <Button
+                        type="button"
+                        onClick={connect}
+                        disabled={!!address || connecting}
+                        variant="outline"
+                      >
+                        {connecting
+                          ? "Connecting..."
+                          : address
+                          ? "Connected"
+                          : "Connect Wallet"}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
+                  {walletError && (
+                    <div className="text-red-500 text-xs">{walletError}</div>
+                  )}
                 </FormItem>
               )}
             />
