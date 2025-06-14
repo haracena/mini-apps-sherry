@@ -14,6 +14,7 @@ interface TelegramUser {
 interface AuthState {
   user: TelegramUser | null;
   setUser: (user: TelegramUser | null) => void;
+  _hasHydrated: boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,9 +22,13 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
+      _hasHydrated: false,
     }),
     {
       name: "telegram-user", // nombre de la key en localStorage
+      onRehydrateStorage: () => (state) => {
+        if (state) state._hasHydrated = true;
+      },
     }
   )
 );
