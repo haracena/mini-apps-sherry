@@ -194,6 +194,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Obtener el platform fee
+    const platformFee = (await publicClient.readContract({
+      address: CONTRACT_ADDRESS,
+      abi: TelegramGroupInvitationABI,
+      functionName: "platformFee",
+    })) as bigint;
+
+    console.log("💰 Platform fee:", platformFee.toString());
+
     // Validar que no exista un registro con el mismo email y group_id
     console.log("🔍 Checking for existing invitation:", { group_id, email });
     const { data: existingInvitation, error: checkError } =
@@ -224,41 +233,38 @@ export async function POST(req: NextRequest) {
         );
       }
       console.log(
-        "✅ Existing invitation is not completed, proceeding with new attempt"
+        "✅ Existing invitation is not completed, continuing with flow"
       );
     } else {
-      console.log("✅ No existing invitation found");
-    }
-
-    // Crear el registro en la base de datos
-    console.log("📝 Creating invitation record");
-
-    const { error: insertError } = await supabaseServiceRole
-      .from("telegram_invitations")
-      .insert([
-        {
-          group_id,
-          email,
-          referral,
-          status: "PENDING",
-        },
-      ]);
-
-    if (insertError) {
-      console.log("❌ Failed to create invitation record:", insertError);
-      return NextResponse.json(
-        { error: "Failed to create invitation record" },
-        {
-          status: 500,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      console.log("✅ No existing invitation found, creating new record");
+      // Crear el registro en la base de datos
+      const { error: insertError } = await supabaseServiceRole
+        .from("telegram_invitations")
+        .insert([
+          {
+            group_id,
+            email,
+            referral,
+            status: "PENDING",
           },
-        }
-      );
+        ]);
+
+      if (insertError) {
+        console.log("❌ Failed to create invitation record:", insertError);
+        return NextResponse.json(
+          { error: "Failed to create invitation record" },
+          {
+            status: 500,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            },
+          }
+        );
+      }
+      console.log("✅ New invitation record created");
     }
-    console.log("✅ Invitation record created");
 
     // Codificar los datos de la función del contrato
     console.log("🔧 Encoding contract function data");
@@ -266,6 +272,14 @@ export async function POST(req: NextRequest) {
       group_id,
       referral || "0x0000000000000000000000000000000000000000",
     ];
+    console.log("📝 Contract args:", {
+      group_id,
+      referral: referral || "0x0000000000000000000000000000000000000000",
+      price: price.toString(),
+      platformFee: platformFee.toString(),
+      total: (price + platformFee).toString(),
+    });
+
     const dataTx = encodeFunctionData({
       abi: TelegramGroupInvitationABI,
       functionName: "buyInvitation",
@@ -274,10 +288,17 @@ export async function POST(req: NextRequest) {
     const tx: TransactionSerializable = {
       to: CONTRACT_ADDRESS,
       data: dataTx,
-      value: BigInt(price),
+      value: BigInt(price) + BigInt(platformFee),
       chainId: avalancheFuji.id,
       type: "legacy",
     };
+    console.log("📦 Transaction data:", {
+      to: CONTRACT_ADDRESS,
+      value: (price + platformFee).toString(),
+      chainId: avalancheFuji.id,
+      data: dataTx,
+    });
+
     const serialized = serialize(tx);
     console.log("✅ Transaction serialized");
 

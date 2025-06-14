@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,13 @@ export default function DashboardLayout({
   const user = useAuthStore((state) => state.user);
   const [miniApps, setMiniApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -55,9 +63,19 @@ export default function DashboardLayout({
                 <Link
                   key={app.group_id}
                   href={`/dashboard/${app.group_id}`}
-                  className="text-sm truncate flex items-center gap-2 opacity-80 hover:opacity-100 transition-all duration-300 hover:translate-x-2"
+                  className={`text-sm truncate flex items-center gap-2 hover:opacity-100 transition-all duration-300 hover:translate-x-2 ${
+                    usePathname() === `/dashboard/${app.group_id}`
+                      ? "opacity-100"
+                      : "opacity-80"
+                  }`}
                 >
-                  <div className="size-8 font-bold rounded-full bg-neutral-800 flex items-center justify-center">
+                  <div
+                    className={`size-8 font-bold rounded-full flex items-center justify-center ${
+                      usePathname() === `/dashboard/${app.group_id}`
+                        ? "bg-indigo-500"
+                        : "bg-neutral-800"
+                    }`}
+                  >
                     {app.title?.[0]}
                   </div>
                   <span className="text-base font-medium">

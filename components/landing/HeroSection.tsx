@@ -23,7 +23,7 @@ export default function HeroSection() {
           <h1 className="text-5xl font-bold text-white">
             Unlock Private Telegram Groups with Blockchain
           </h1>
-          <p className="text-neutral-500 text-xl mb-4">
+          <p className="text-neutral-400 text-xl mb-4">
             Automate access, monetize your community, and manage invitations
             securely with Avalanche-powered mini apps.
           </p>
