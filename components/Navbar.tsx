@@ -45,8 +45,8 @@ export default function Navbar() {
               <button
                 className="ml-2 px-3 py-1 rounded flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-sm"
                 onClick={() => {
-                  setUser(null);
                   router.push("/");
+                  setUser(null);
                 }}
               >
                 Logout
