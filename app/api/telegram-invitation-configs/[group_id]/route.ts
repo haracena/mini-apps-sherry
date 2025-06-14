@@ -1,11 +1,15 @@
 import { NextRequest } from "next/server";
 import { supabaseServiceRole } from "@/lib/supabase";
 
-export async function GET(
-  req: NextRequest,
-  context: { params: { group_id: string } }
-) {
-  const { group_id } = await context.params;
+function extractGroupId(req: NextRequest) {
+  // /api/telegram-invitation-configs/[group_id]
+  const pathname = new URL(req.url).pathname;
+  // Extrae el último segmento
+  return pathname.split("/").pop();
+}
+
+export async function GET(req: NextRequest) {
+  const group_id = extractGroupId(req);
   if (!group_id) {
     return Response.json({ error: "Missing group_id" }, { status: 400 });
   }
@@ -28,12 +32,9 @@ export async function GET(
   return Response.json({ data });
 }
 
-export async function PATCH(
-  req: NextRequest,
-  context: { params: { group_id: string } }
-) {
+export async function PATCH(req: NextRequest) {
   try {
-    const { group_id } = context.params;
+    const group_id = extractGroupId(req);
     const body = await req.json();
     const {
       title,

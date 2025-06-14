@@ -373,7 +373,7 @@ export default function SecondStep({
                       <Button
                         type="button"
                         onClick={connect}
-                        disabled={!!address || connecting}
+                        disabled={connecting}
                         variant="outline"
                       >
                         {connecting
