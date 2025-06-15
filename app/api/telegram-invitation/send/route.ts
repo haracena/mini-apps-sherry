@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     // 2. Enviar el email usando Resend
     try {
       const { data, error } = await resend.emails.send({
-        from: "Telegram Invitations <onboarding@resend.dev>",
+        from: "Telegram Invitations <noreply@colorpocket.app>",
         to: email,
         subject: "Your invitation to the private Telegram group",
         html: `<p>Hello!</p><p>Thank you for your purchase. Here is your invitation link to the private Telegram group:</p><p><a href="${invitation_url}">${invitation_url}</a></p>`,
