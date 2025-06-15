@@ -2,13 +2,25 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Copy } from "lucide-react";
+import { Copy, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { supabase } from "@/lib/supabase-client";
+import { TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TooltipContent } from "@/components/ui/tooltip";
 
 interface ThirdStepProps {
   methods: any;
@@ -38,9 +50,20 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
     fetchData();
     if (!group_id) return;
     setLoadingTx(true);
-    fetch(`/api/telegram-invitation/transactions?group_id=${group_id}`)
-      .then((res) => res.json())
-      .then((res) => setTransactions(res.data || []))
+
+    supabase
+      .from("telegram_invitations")
+      .select()
+      .eq("group_id", group_id)
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (error) {
+          setError(error.message);
+          setTransactions([]);
+        } else {
+          setTransactions(data || []);
+        }
+      })
       .finally(() => setLoadingTx(false));
     // eslint-disable-next-line
   }, []);
@@ -153,6 +176,71 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                 </DialogContent>
               </Dialog>
             </div>
+            <Table className="mt-8 w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Payer Address</TableHead>
+                  <TableHead>Invitation Link</TableHead>
+                  <TableHead>
+                    Status{" "}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="size-3 inline-block ml-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          PENDING: the user has not yet paid for the invitation.
+                          <br />
+                          COMPLETED: the user has paid for the invitation and
+                          received the invitation link.
+                          <br />
+                          FAILED: the user has paid for the invitation but the
+                          invitation link was not sent to the user.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-neutral-400"
+                    >
+                      No invitations found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  transactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell>
+                        {tx.created_at
+                          ? new Date(tx.created_at).toLocaleString()
+                          : "-"}
+                      </TableCell>
+                      <TableCell>{tx.email}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {tx.payer_address}
+                      </TableCell>
+                      <TableCell>
+                        {tx.telegram_invitation_url ? (
+                          <span className="text-neutral-400">
+                            {tx.telegram_invitation_url}
+                          </span>
+                        ) : (
+                          <span className="text-neutral-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{tx.status}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </>
       )}

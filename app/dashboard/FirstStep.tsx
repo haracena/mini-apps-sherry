@@ -4,8 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { CheckCircle2, Loader2, Copy } from "lucide-react";
+import { CheckCircle2, Loader2, Copy, Info } from "lucide-react";
 import { CopyInput } from "@/components/ui/CopyInput";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FirstStepProps {
   methods: any;
@@ -57,7 +62,20 @@ export default function FirstStep({ methods, setCurrentStep }: FirstStepProps) {
         Add <span className="font-bold">MiniApps Blockchain Bot</span> to your
         group
       </h2>
-      <p>Click on the following link to add the bot to your group</p>
+      <p>
+        Click on the following link to add the bot to your group{" "}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Info className="w-4 h-4 inline-block" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              If your are using Telegram web you must add MiniAppsBlockchainBot
+              to your group manually
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </p>
 
       <Link
         href="https://t.me/MiniAppsBlockchainBot?startgroup=start"
