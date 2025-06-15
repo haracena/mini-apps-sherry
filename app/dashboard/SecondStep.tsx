@@ -379,8 +379,8 @@ export default function SecondStep({
                         {connecting
                           ? "Connecting..."
                           : address
-                          ? "Connected"
-                          : "Connect Wallet"}
+                            ? "Connected"
+                            : "Connect Wallet"}
                       </Button>
                     </div>
                   </FormControl>
@@ -402,7 +402,7 @@ export default function SecondStep({
                     <Input
                       type="number"
                       min="0"
-                      step="0.01"
+                      step="0.001"
                       placeholder="Enter price"
                       value={field.value === undefined ? "" : field.value}
                       onChange={(e) => handleNumberChange(e, field)}

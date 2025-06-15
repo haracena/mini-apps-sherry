@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase-client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { v4 as uuidv4 } from "uuid";
+import { PlusIcon } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -54,7 +57,7 @@ export default function DashboardLayout({
       />
       <div className="grid grid-cols-[280px_1fr] min-h-[85vh] my-4 rounded-lg overflow-hidden">
         <div className="flex flex-col gap-4 p-4 bg-neutral-900/75 overflow-y-auto">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 h-full">
             <p className="text-base text-neutral-500">Mini Apps Dashboard</p>
             {loading && (
               <span className="text-xs text-neutral-500">Loading...</span>
@@ -89,6 +92,16 @@ export default function DashboardLayout({
                   </span>
                 </Link>
               ))}
+            <Button
+              variant={"secondary"}
+              className="flex items-center gap-2 justify-center mt-auto"
+              onClick={() => {
+                router.push(`/dashboard/${uuidv4()}`);
+              }}
+            >
+              <PlusIcon className="w-4 h-4" />
+              Create mini app
+            </Button>
           </div>
         </div>
         <div className="p-8 bg-neutral-950/50 w-full h-full backdrop-blur-xl">

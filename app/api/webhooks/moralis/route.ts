@@ -29,8 +29,10 @@ export async function POST(req: NextRequest) {
             log.topic3,
           ]);
           // decoded es un objeto con las propiedades del evento
-          const groupId = decoded.groupId;
-          const buyer = decoded.buyer;
+          // groupId puede ser un objeto Indexed, lo convertimos a string
+          const groupId = decoded.groupId.toString();
+          // buyer puede venir con mayúsculas, normalizamos a minúsculas
+          const buyer = decoded.buyer.toLowerCase();
           const referrer = decoded.referrer;
           const amount = decoded.amount;
           const commission = decoded.commission;
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
             platformFee: platformFee.toString(),
           });
 
-          // Busca la invitación pendiente en Supabase
+          // Busca la invitación pendiente en Supabase (siempre en minúsculas)
           const { data: invitation, error } = await supabaseServiceRole
             .from("telegram_invitations")
             .select()
@@ -55,19 +57,73 @@ export async function POST(req: NextRequest) {
             .single();
           if (error) {
             console.log("❌ Error buscando invitación:", error);
+            continue;
           }
           if (invitation) {
-            // Marca como completada
-            const { error: updateError } = await supabaseServiceRole
-              .from("telegram_invitations")
-              .update({ status: "COMPLETED" })
-              .eq("id", invitation.id);
-            if (updateError) {
-              console.log("❌ Error actualizando invitación:", updateError);
-            } else {
-              console.log(
-                `✅ Invitación COMPLETED para group_id=${groupId}, payer_address=${buyer}`
+            // Llama al API interno para enviar la invitación por email
+            try {
+              const sendRes = await fetch(
+                `${
+                  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+                }/api/telegram-invitation/send`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    group_id: groupId,
+                    email: invitation.email,
+                    payer_address: buyer, // ya en minúsculas
+                  }),
+                }
               );
+              const sendData = await sendRes.json();
+              console.log("✉️ Resultado envío invitación:", sendData);
+
+              if (sendRes.ok && sendData.success && sendData.invitation_url) {
+                // Email enviado correctamente, update a COMPLETED y guarda el link
+                const { error: updateError } = await supabaseServiceRole
+                  .from("telegram_invitations")
+                  .update({
+                    status: "COMPLETED",
+                    telegram_invitation_url: sendData.invitation_url,
+                  })
+                  .eq("id", invitation.id);
+                if (updateError) {
+                  console.log(
+                    "❌ Error actualizando a COMPLETED:",
+                    updateError
+                  );
+                } else {
+                  console.log("✅ Invitación marcada como COMPLETED");
+                }
+              } else {
+                // Falló el envío, update a FAILED
+                const { error: failError } = await supabaseServiceRole
+                  .from("telegram_invitations")
+                  .update({ status: "FAILED" })
+                  .eq("id", invitation.id);
+                if (failError) {
+                  console.log("❌ Error actualizando a FAILED:", failError);
+                } else {
+                  console.log(
+                    "❌ Invitación marcada como FAILED (envío fallido)"
+                  );
+                }
+              }
+            } catch (err) {
+              // Error en el fetch/email, update a FAILED
+              console.error("❌ Error enviando invitación:", err);
+              const { error: failError } = await supabaseServiceRole
+                .from("telegram_invitations")
+                .update({ status: "FAILED" })
+                .eq("id", invitation.id);
+              if (failError) {
+                console.log("❌ Error actualizando a FAILED:", failError);
+              } else {
+                console.log(
+                  "❌ Invitación marcada como FAILED (error en fetch)"
+                );
+              }
             }
           } else {
             console.log(
