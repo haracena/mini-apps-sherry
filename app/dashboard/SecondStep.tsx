@@ -72,7 +72,7 @@ interface SecondStepProps {
   setCurrentStep: (step: number) => void;
 }
 
-const CONTRACT_ADDRESS = "0x6aC5052432CDdb9Ff4F1b39DA03CA133dBCd8DcF"; // Reemplaza por tu address real
+const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396"; // Reemplaza por tu address real
 
 async function createGroupOnChain({
   groupId,
@@ -86,8 +86,8 @@ async function createGroupOnChain({
   if (!(window as any).ethereum) throw new Error("MetaMask not found");
   await (window as any).ethereum.request({ method: "eth_requestAccounts" });
   const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-fuji",
-    chainId: 43113,
+    name: "avalanche-mainnet",
+    chainId: 43114,
   });
   const signer = await provider.getSigner();
   const contract = new Contract(
@@ -108,8 +108,8 @@ async function createGroupOnChain({
 async function getGroupOnChain(groupId: string) {
   if (!(window as any).ethereum) throw new Error("MetaMask not found");
   const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-fuji",
-    chainId: 43113,
+    name: "avalanche-mainnet",
+    chainId: 43114,
   });
   const contract = new Contract(
     CONTRACT_ADDRESS,
@@ -138,8 +138,8 @@ async function updateGroupOnChain({
   if (!(window as any).ethereum) throw new Error("MetaMask not found");
   await (window as any).ethereum.request({ method: "eth_requestAccounts" });
   const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-fuji",
-    chainId: 43113,
+    name: "avalanche-mainnet",
+    chainId: 43114,
   });
   const signer = await provider.getSigner();
   const contract = new Contract(
@@ -285,7 +285,7 @@ export default function SecondStep({
             <span>
               Tx:{" "}
               <a
-                href={`https://testnet.snowtrace.io/tx/${txHash}`}
+                href={`https://snowtrace.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-blue-500"

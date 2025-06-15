@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { avalancheFuji } from "viem/chains";
+import { avalanche } from "viem/chains";
 import {
   createMetadata,
   Metadata,
@@ -14,11 +14,11 @@ import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
 import { supabaseServiceRole } from "@/lib/supabase";
 import { createPublicClient, http } from "viem";
 
-const CONTRACT_ADDRESS = "0x6aC5052432CDdb9Ff4F1b39DA03CA133dBCd8DcF";
+const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396";
 
 const publicClient = createPublicClient({
-  chain: avalancheFuji,
-  transport: http("https://api.avax-test.network/ext/bc/C/rpc"),
+  chain: avalanche,
+  transport: http("https://api.avax.network/ext/bc/C/rpc"),
 });
 
 export async function GET(req: NextRequest) {
@@ -63,7 +63,16 @@ export async function GET(req: NextRequest) {
       description: "Your email address to receive the invitation",
     });
 
-    const params = [emailParam];
+    const payerAddressParam = {
+      name: "payer_address",
+      label: "Your Wallet Address",
+      type: "address",
+      value: "sender",
+      required: true,
+      description: "Your wallet address (auto-filled by Sherry)",
+    };
+
+    const params = [emailParam, payerAddressParam];
 
     if (referralCommission && Number(referralCommission) > 0) {
       params.push({
@@ -91,7 +100,7 @@ export async function GET(req: NextRequest) {
           description: `Invitation to the group: ${
             data.title || group_id
           } (Price: ${invitationPriceAvax} AVAX)`,
-          chains: { source: "fuji" },
+          chains: { source: "avalanche" },
           path: `/api/telegram-invitation?group_id=${group_id}`,
           params,
         },
@@ -122,7 +131,14 @@ export async function POST(req: NextRequest) {
       ? decodeURIComponent(searchParams.get("email")!)
       : null;
     const referral = searchParams.get("referral");
-    console.log("🔍 Query params:", { group_id, email, referral });
+    const payer_address = searchParams.get("payer_address");
+    console.log(req.headers);
+    console.log("🔍 Query params:", {
+      group_id,
+      email,
+      referral,
+      payer_address,
+    });
 
     if (!group_id || !email) {
       console.log("❌ Missing required params:", { group_id, email });
@@ -244,6 +260,7 @@ export async function POST(req: NextRequest) {
           {
             group_id,
             email,
+            payer_address,
             referral,
             status: "PENDING",
           },
@@ -289,13 +306,13 @@ export async function POST(req: NextRequest) {
       to: CONTRACT_ADDRESS,
       data: dataTx,
       value: BigInt(price) + BigInt(platformFee),
-      chainId: avalancheFuji.id,
+      chainId: avalanche.id,
       type: "legacy",
     };
     console.log("📦 Transaction data:", {
       to: CONTRACT_ADDRESS,
       value: (price + platformFee).toString(),
-      chainId: avalancheFuji.id,
+      chainId: avalanche.id,
       data: dataTx,
     });
 
@@ -304,7 +321,7 @@ export async function POST(req: NextRequest) {
 
     const resp: ExecutionResponse = {
       serializedTransaction: serialized,
-      chainId: avalancheFuji.name,
+      chainId: avalanche.name,
     };
     console.log("🚀 Sending response");
     return NextResponse.json(resp, {

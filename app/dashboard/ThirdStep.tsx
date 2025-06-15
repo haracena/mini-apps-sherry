@@ -150,59 +150,6 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                       </span>
                     </span>
                   </div>
-                  <div className="mt-6">
-                    <h4 className="font-semibold mb-2">
-                      Últimas transacciones on-chain
-                    </h4>
-                    {loadingTx ? (
-                      <div className="text-xs text-neutral-400">
-                        Cargando...
-                      </div>
-                    ) : transactions.length === 0 ? (
-                      <div className="text-xs text-neutral-400">
-                        No hay transacciones recientes.
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr>
-                              <th className="text-left">Tx Hash</th>
-                              <th className="text-left">Buyer</th>
-                              <th className="text-left">Amount</th>
-                              <th className="text-left">Fecha</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {transactions.slice(0, 10).map((tx) => (
-                              <tr key={tx.txHash}>
-                                <td>
-                                  <a
-                                    href={`https://testnet.snowtrace.io/tx/${tx.txHash}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="underline text-blue-400"
-                                  >
-                                    {tx.txHash.slice(0, 10)}...
-                                    {tx.txHash.slice(-6)}
-                                  </a>
-                                </td>
-                                <td>
-                                  {tx.buyer.slice(0, 8)}...{tx.buyer.slice(-4)}
-                                </td>
-                                <td>{Number(tx.amount) / 1e18} AVAX</td>
-                                <td>
-                                  {tx.timestamp
-                                    ? new Date(tx.timestamp).toLocaleString()
-                                    : "-"}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
                 </DialogContent>
               </Dialog>
             </div>

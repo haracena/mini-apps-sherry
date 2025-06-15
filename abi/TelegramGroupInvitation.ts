@@ -1,46 +1,5 @@
 export const TelegramGroupInvitationABI = [
   {
-    inputs: [
-      {
-        internalType: "string",
-        name: "groupId",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "referrer",
-        type: "address",
-      },
-    ],
-    name: "buyInvitation",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "groupId",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "price",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "referralCommission",
-        type: "uint256",
-      },
-    ],
-    name: "createGroup",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [],
     stateMutability: "nonpayable",
     type: "constructor",
@@ -164,29 +123,34 @@ export const TelegramGroupInvitationABI = [
     type: "event",
   },
   {
-    inputs: [
+    inputs: [],
+    name: "accumulatedFees",
+    outputs: [
       {
         internalType: "uint256",
-        name: "newFee",
+        name: "",
         type: "uint256",
       },
     ],
-    name: "setPlatformFee",
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
   {
     inputs: [
       {
+        internalType: "string",
+        name: "groupId",
+        type: "string",
+      },
+      {
         internalType: "address",
-        name: "newOwner",
+        name: "referrer",
         type: "address",
       },
     ],
-    name: "setPlatformOwner",
+    name: "buyInvitation",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -207,29 +171,9 @@ export const TelegramGroupInvitationABI = [
         type: "uint256",
       },
     ],
-    name: "updateGroup",
+    name: "createGroup",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "withdrawFees",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "accumulatedFees",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
   {
@@ -372,6 +316,62 @@ export const TelegramGroupInvitationABI = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "newFee",
+        type: "uint256",
+      },
+    ],
+    name: "setPlatformFee",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "setPlatformOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "groupId",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "referralCommission",
+        type: "uint256",
+      },
+    ],
+    name: "updateGroup",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "withdrawFees",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];
