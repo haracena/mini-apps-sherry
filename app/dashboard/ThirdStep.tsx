@@ -51,21 +51,21 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
     if (!group_id) return;
     setLoadingTx(true);
 
-    supabase
-      .from("telegram_invitations")
-      .select()
-      .eq("group_id", group_id)
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          setError(error.message);
-          setTransactions([]);
-        } else {
-          setTransactions(data || []);
-        }
-      })
-      .finally(() => setLoadingTx(false));
-    // eslint-disable-next-line
+    (async () => {
+      const { data, error } = await supabase
+        .from("telegram_invitations")
+        .select()
+        .eq("group_id", group_id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setError(error.message);
+        setTransactions([]);
+      } else {
+        setTransactions(data || []);
+      }
+      setLoadingTx(false);
+    })();
   }, []);
 
   async function fetchData() {
