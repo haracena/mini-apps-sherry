@@ -29,7 +29,7 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://mini-apps-sherry.vercel.app/api/telegram-invitation?group_id=${group_id}`;
+  const shareUrl = `https://app.sherry.social/action?url=https://mini-apps-sherry.vercel.app/api/telegram-invitation?group_id=${group_id}`;
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loadingTx, setLoadingTx] = useState(false);
 
