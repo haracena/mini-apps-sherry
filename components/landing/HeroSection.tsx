@@ -18,7 +18,7 @@ export default function HeroSection() {
         height={982}
         className="absolute top-0 left-0 w-full h-full object-cover -z-10 opacity-20"
       />
-      <div className="max-w-7xl mx-auto px-4 py-32 grid grid-cols-2 gap-4">
+      <div className="max-w-7xl mx-auto px-8 py-32 grid grid-cols-2 gap-4">
         <div className="text-pretty flex flex-col gap-4">
           <h1 className="text-5xl font-bold text-white">
             Unlock Private Telegram Groups with Blockchain
