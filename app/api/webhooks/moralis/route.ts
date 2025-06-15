@@ -21,16 +21,15 @@ export async function POST(req: NextRequest) {
     for (const log of logs) {
       if (log.topic0 === invitationBoughtTopic) {
         try {
-          // Decodifica el log
+          // Decodifica el log para obtener buyer y otros datos
           const decoded = iface.decodeEventLog("InvitationBought", log.data, [
             log.topic0,
             log.topic1,
             log.topic2,
             log.topic3,
           ]);
-          // decoded es un objeto con las propiedades del evento
-          // groupId puede ser un objeto Indexed, lo convertimos a string
-          const groupId = decoded.groupId.toString();
+          // group_id_hash es log.topic1 (hash del string group_id)
+          const group_id_hash = log.topic1;
           // buyer puede venir con mayúsculas, normalizamos a minúsculas
           const buyer = decoded.buyer.toLowerCase();
           const referrer = decoded.referrer;
@@ -39,7 +38,7 @@ export async function POST(req: NextRequest) {
           const platformFee = decoded.platformFee;
 
           console.log("🎯 Decoded InvitationBought:", {
-            groupId,
+            group_id_hash,
             buyer,
             referrer,
             amount: amount.toString(),
@@ -47,11 +46,11 @@ export async function POST(req: NextRequest) {
             platformFee: platformFee.toString(),
           });
 
-          // Busca la invitación pendiente en Supabase (siempre en minúsculas)
+          // Busca la invitación pendiente en Supabase usando el hash y payer_address
           const { data: invitation, error } = await supabaseServiceRole
             .from("telegram_invitations")
             .select()
-            .eq("group_id", groupId)
+            .eq("group_id_hash", group_id_hash)
             .eq("payer_address", buyer)
             .eq("status", "PENDING")
             .single();
@@ -60,17 +59,42 @@ export async function POST(req: NextRequest) {
             continue;
           }
           if (invitation) {
+            // Cruza con telegram_invitation_configs para obtener telegram_group_id
+            const { data: config, error: configError } =
+              await supabaseServiceRole
+                .from("telegram_invitation_configs")
+                .select("telegram_group_id")
+                .eq("group_id", invitation.group_id)
+                .single();
+            if (configError || !config?.telegram_group_id) {
+              console.log(
+                "❌ No se pudo obtener telegram_group_id para el grupo:",
+                invitation.group_id
+              );
+              // Marca la invitación como FAILED
+              const { error: failError } = await supabaseServiceRole
+                .from("telegram_invitations")
+                .update({ status: "FAILED" })
+                .eq("id", invitation.id);
+              if (failError) {
+                console.log("❌ Error actualizando a FAILED:", failError);
+              } else {
+                console.log(
+                  "❌ Invitación marcada como FAILED (sin telegram_group_id)"
+                );
+              }
+              continue;
+            }
+            const telegram_group_id = config.telegram_group_id;
             // Llama al API interno para enviar la invitación por email
             try {
               const sendRes = await fetch(
-                `${
-                  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-                }/api/telegram-invitation/send`,
+                `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/telegram-invitation/send`,
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    group_id: groupId,
+                    group_id: telegram_group_id, // el real de Telegram
                     email: invitation.email,
                     payer_address: buyer, // ya en minúsculas
                   }),
@@ -127,7 +151,7 @@ export async function POST(req: NextRequest) {
             }
           } else {
             console.log(
-              `ℹ️ No se encontró invitación pendiente para group_id=${groupId}, payer_address=${buyer}`
+              `ℹ️ No se encontró invitación pendiente para group_id_hash=${group_id_hash}, payer_address=${buyer}`
             );
           }
         } catch (err) {

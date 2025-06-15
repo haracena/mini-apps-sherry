@@ -13,6 +13,7 @@ import { encodeFunctionData, TransactionSerializable } from "viem";
 import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
 import { supabaseServiceRole } from "@/lib/supabase";
 import { createPublicClient, http } from "viem";
+import { ethers, keccak256, toUtf8Bytes } from "ethers";
 
 const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396";
 
@@ -253,14 +254,17 @@ export async function POST(req: NextRequest) {
       );
     } else {
       console.log("✅ No existing invitation found, creating new record");
+      // Calcular el hash del group_id (Solidity style)
+      const group_id_hash = keccak256(toUtf8Bytes(group_id));
       // Crear el registro en la base de datos
       const { error: insertError } = await supabaseServiceRole
         .from("telegram_invitations")
         .insert([
           {
             group_id,
+            group_id_hash, // nuevo campo para cruce on-chain
             email,
-            payer_address,
+            payer_address: payer_address?.toLowerCase(),
             referral,
             status: "PENDING",
           },
