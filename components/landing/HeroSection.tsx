@@ -27,6 +27,18 @@ export default function HeroSection() {
             Automate access, monetize your community, and manage invitations
             securely with Avalanche-powered mini apps.
           </p>
+          <Link
+            href="https://t.me/MiniAppsBlockchainBot"
+            target="_blank"
+            className="text-neutral-400 text-sm"
+          >
+            Before logging in, you must open{" "}
+            <span className="underline">
+              {" "}
+              this link and press <b>Start</b> in the bot to link your Telegram
+              account.
+            </span>
+          </Link>
           {user ? (
             <Link
               className="w-fit cursor-pointer hover:-translate-y-1 duration-300"
