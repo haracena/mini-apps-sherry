@@ -6,7 +6,6 @@ import Link from "next/link";
 import Steps from "./Steps";
 import TelegramLogin from "../TelegramLogin";
 import { useAuthStore } from "@/store/useAuthStore";
-import TelegramLoginButton, { TelegramUser } from "telegram-login-button";
 
 export default function HeroSection() {
   const user = useAuthStore((state) => state.user);
@@ -48,12 +47,7 @@ export default function HeroSection() {
               <Button className="w-fit cursor-pointer">Go to dashboard</Button>
             </Link>
           ) : (
-            <TelegramLoginButton
-              botName="MiniAppsBlockchainBot"
-              data-size="large"
-              dataOnauth={(user: TelegramUser) => console.log(user)}
-              data-request-access="write"
-            />
+            <TelegramLogin />
           )}
           <p className="text-neutral-500 font-medium mt-12">Built on</p>
           <div className="flex gap-4">
