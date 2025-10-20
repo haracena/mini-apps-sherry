@@ -1,25 +1,26 @@
-import { useState } from "react";
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 
 export function useWallet() {
-  const [address, setAddress] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { address, isConnected, isConnecting } = useAccount()
+  const { disconnect } = useDisconnect()
+  const { open } = useWeb3Modal()
 
   const connect = async () => {
-    setError(null);
-    setConnecting(true);
     try {
-      if (!(window as any).ethereum) throw new Error("MetaMask not found");
-      const accounts = await (window as any).ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setAddress(accounts[0]);
-    } catch (err: any) {
-      setError(err.message || "Wallet connection failed");
-    } finally {
-      setConnecting(false);
+      await open()
+    } catch (error) {
+      console.error('Error connecting wallet:', error)
+      throw error
     }
-  };
+  }
 
-  return { address, connect, connecting, error };
+  return {
+    address: address || null,
+    connect,
+    disconnect,
+    connecting: isConnecting,
+    isConnected,
+    error: null
+  }
 }

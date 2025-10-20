@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
 import Footer from "@/components/Footer";
-
+import { Web3Provider } from "@/providers/Web3Provider";
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
@@ -49,6 +49,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${poppins.variable} antialiased`}>
+         <Web3Provider>
+          {children}
+          <Toaster position="top-right" />
+        </Web3Provider>
         <Navbar />
         <Toaster />
         {children}
