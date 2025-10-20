@@ -17,9 +17,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
-import { Contract, BrowserProvider, parseEther } from "ethers";
+import { parseEther, formatEther } from "viem";
 import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
+import { useWalletClient, usePublicClient } from "wagmi";
+import { getContract } from "viem";
 
 const formSchema = z
   .object({
@@ -72,100 +74,12 @@ interface SecondStepProps {
   setCurrentStep: (step: number) => void;
 }
 
-const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396"; // Reemplaza por tu address real
-
-async function createGroupOnChain({
-  groupId,
-  price, // en AVAX
-  referralCommission,
-}: {
-  groupId: string;
-  price: number;
-  referralCommission: number;
-}) {
-  if (!(window as any).ethereum) throw new Error("MetaMask not found");
-  await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-  const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-mainnet",
-    chainId: 43114,
-  });
-  const signer = await provider.getSigner();
-  const contract = new Contract(
-    CONTRACT_ADDRESS,
-    TelegramGroupInvitationABI,
-    signer
-  );
-  const priceInWei = parseEther(price.toString());
-  const tx = await contract.createGroup(
-    groupId,
-    priceInWei,
-    referralCommission
-  );
-  await tx.wait();
-  return tx.hash;
-}
-
-async function getGroupOnChain(groupId: string) {
-  if (!(window as any).ethereum) throw new Error("MetaMask not found");
-  const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-mainnet",
-    chainId: 43114,
-  });
-  const contract = new Contract(
-    CONTRACT_ADDRESS,
-    TelegramGroupInvitationABI,
-    provider
-  );
-  const group = await contract.getGroup(groupId);
-  // group: [owner, price, referralCommission, exists]
-  return {
-    owner: group[0],
-    price: group[1],
-    referralCommission: group[2],
-    exists: Boolean(group[3]),
-  };
-}
-
-async function updateGroupOnChain({
-  groupId,
-  price, // en AVAX
-  referralCommission,
-}: {
-  groupId: string;
-  price: number;
-  referralCommission: number;
-}) {
-  if (!(window as any).ethereum) throw new Error("MetaMask not found");
-  await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-  const provider = new BrowserProvider((window as any).ethereum, {
-    name: "avalanche-mainnet",
-    chainId: 43114,
-  });
-  const signer = await provider.getSigner();
-  const contract = new Contract(
-    CONTRACT_ADDRESS,
-    TelegramGroupInvitationABI,
-    signer
-  );
-  const priceInWei = parseEther(price.toString());
-  const tx = await contract.updateGroup(
-    groupId,
-    priceInWei,
-    referralCommission
-  );
-  await tx.wait();
-  return tx.hash;
-}
+const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396" as `0x${string}`;
 
 export default function SecondStep({
   methods,
   setCurrentStep,
 }: SecondStepProps) {
-  useEffect(() => {
-    setCurrentStep(1);
-    fetchData();
-  }, []);
-
   const params = useParams();
   const group_id = params.id as string;
   const [loading, setLoading] = useState(false);
@@ -173,7 +87,10 @@ export default function SecondStep({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
-  const { address, connect, connecting, error: walletError } = useWallet();
+  
+  const { address, connect, connecting, isConnected } = useWallet();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -186,6 +103,11 @@ export default function SecondStep({
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    setCurrentStep(1);
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (address) {
@@ -217,6 +139,80 @@ export default function SecondStep({
     }
   }
 
+  async function getGroupOnChain(groupId: string) {
+    if (!publicClient) throw new Error("Public client not ready");
+    
+    const contract = getContract({
+      address: CONTRACT_ADDRESS,
+      abi: TelegramGroupInvitationABI,
+      client: publicClient,
+    });
+
+    const group = await contract.read.getGroup([groupId]);
+    return {
+      owner: group[0],
+      price: group[1],
+      referralCommission: group[2],
+      exists: Boolean(group[3]),
+    };
+  }
+
+  async function createGroupOnChain({
+    groupId,
+    price,
+    referralCommission,
+  }: {
+    groupId: string;
+    price: number;
+    referralCommission: number;
+  }) {
+    if (!walletClient) throw new Error("Wallet not connected");
+    
+    const contract = getContract({
+      address: CONTRACT_ADDRESS,
+      abi: TelegramGroupInvitationABI,
+      client: walletClient,
+    });
+
+    const priceInWei = parseEther(price.toString());
+    const hash = await contract.write.createGroup([
+      groupId,
+      priceInWei,
+      referralCommission,
+    ]);
+
+    const receipt = await publicClient?.waitForTransactionReceipt({ hash });
+    return hash;
+  }
+
+  async function updateGroupOnChain({
+    groupId,
+    price,
+    referralCommission,
+  }: {
+    groupId: string;
+    price: number;
+    referralCommission: number;
+  }) {
+    if (!walletClient) throw new Error("Wallet not connected");
+    
+    const contract = getContract({
+      address: CONTRACT_ADDRESS,
+      abi: TelegramGroupInvitationABI,
+      client: walletClient,
+    });
+
+    const priceInWei = parseEther(price.toString());
+    const hash = await contract.write.updateGroup([
+      groupId,
+      priceInWei,
+      referralCommission,
+    ]);
+
+    await publicClient?.waitForTransactionReceipt({ hash });
+    return hash;
+  }
+
   function areValuesEqual(a: FormValues, b: FormValues) {
     return (
       a.title === b.title &&
@@ -231,6 +227,7 @@ export default function SecondStep({
     setLoading(true);
     setError(null);
     setSuccess(false);
+    
     try {
       if (originalValues && areValuesEqual(values, originalValues)) {
         setSuccess(true);
@@ -238,21 +235,22 @@ export default function SecondStep({
         methods.next();
         return;
       }
-      // 1. Consultar si el grupo existe en el contrato
+
       const group = await getGroupOnChain(group_id);
       let txHash: string | undefined = undefined;
+
       if (!group.exists) {
-        // Crear grupo en el smart contract
         txHash = await createGroupOnChain({
           groupId: group_id,
           price: values.invitationPrice,
           referralCommission: values.referralCommission ?? 0,
         });
       } else {
-        // Detectar si cambiaron los campos on-chain
+        const priceInAvax = Number(formatEther(group.price));
         const onChainChanged =
-          values.invitationPrice !== Number(group.price) / 1e18 ||
+          Math.abs(values.invitationPrice - priceInAvax) > 0.0001 ||
           values.referralCommission !== Number(group.referralCommission);
+
         if (onChainChanged) {
           txHash = await updateGroupOnChain({
             groupId: group_id,
@@ -261,7 +259,7 @@ export default function SecondStep({
           });
         }
       }
-      // 2. Actualizar en Supabase (siempre)
+
       const res = await fetch(`/api/telegram-invitation-configs/${group_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -273,12 +271,15 @@ export default function SecondStep({
           referralCommission: values.referralCommission,
         }),
       });
+
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || "Error updating group config");
       }
+
       setSuccess(true);
       setOriginalValues(values);
+
       if (txHash) {
         toast.success("Group updated on blockchain", {
           description: (
@@ -297,9 +298,13 @@ export default function SecondStep({
           duration: 8000,
         });
       }
+
       methods.next();
     } catch (err: any) {
       setError(err.message || "Unknown error");
+      toast.error("Error", {
+        description: err.message || "Unknown error occurred"
+      });
     } finally {
       setLoading(false);
     }
@@ -373,21 +378,18 @@ export default function SecondStep({
                       <Button
                         type="button"
                         onClick={connect}
-                        disabled={connecting}
+                        disabled={connecting || isConnected}
                         variant="outline"
                       >
                         {connecting
                           ? "Connecting..."
-                          : address
+                          : isConnected
                             ? "Connected"
                             : "Connect Wallet"}
                       </Button>
                     </div>
                   </FormControl>
                   <FormMessage />
-                  {walletError && (
-                    <div className="text-red-500 text-xs">{walletError}</div>
-                  )}
                 </FormItem>
               )}
             />
@@ -439,7 +441,10 @@ export default function SecondStep({
               <Button variant={"outline"} onClick={() => methods.prev()}>
                 ← Prev Step
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading || !isConnected}
+              >
                 {loading ? "Saving..." : "Next Step →"}
               </Button>
             </div>
