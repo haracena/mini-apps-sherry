@@ -88,7 +88,19 @@ export default function SecondStep({
   const [success, setSuccess] = useState(false);
   const [originalValues, setOriginalValues] = useState<FormValues | null>(null);
   
-  const { address, connect, connecting, isConnected } = useWallet();
+  const {
+    address,
+    connect,
+    connecting,
+    isConnected,
+    isCorrectNetwork,
+    switchToAvalanche,
+    balance,
+    balanceFormatted,
+    isLoadingBalance,
+    error: walletError,
+    refetchBalance
+  } = useWallet();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
@@ -227,7 +239,29 @@ export default function SecondStep({
     setLoading(true);
     setError(null);
     setSuccess(false);
-    
+
+    // Verificar conexión de wallet
+    if (!isConnected) {
+      toast.error("Wallet Not Connected", {
+        description: "Please connect your wallet first"
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Verificar red correcta
+    if (!isCorrectNetwork) {
+      toast.warning("Wrong Network", {
+        description: "Please switch to Avalanche network",
+        action: {
+          label: "Switch Network",
+          onClick: () => switchToAvalanche()
+        }
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       if (originalValues && areValuesEqual(values, originalValues)) {
         setSuccess(true);
@@ -240,6 +274,20 @@ export default function SecondStep({
       let txHash: string | undefined = undefined;
 
       if (!group.exists) {
+        // Estimar gas y verificar balance antes de crear
+        const estimatedCost = parseEther("0.01"); // Estimación conservadora
+        if (balance < estimatedCost) {
+          toast.error("Insufficient Balance", {
+            description: `You need at least 0.01 AVAX for gas. Current balance: ${balanceFormatted} AVAX`
+          });
+          setLoading(false);
+          return;
+        }
+
+        toast.info("Creating Group", {
+          description: "Please confirm the transaction in your wallet..."
+        });
+
         txHash = await createGroupOnChain({
           groupId: group_id,
           price: values.invitationPrice,
@@ -252,6 +300,20 @@ export default function SecondStep({
           values.referralCommission !== Number(group.referralCommission);
 
         if (onChainChanged) {
+          // Verificar balance antes de actualizar
+          const estimatedCost = parseEther("0.005"); // Estimación conservadora
+          if (balance < estimatedCost) {
+            toast.error("Insufficient Balance", {
+              description: `You need at least 0.005 AVAX for gas. Current balance: ${balanceFormatted} AVAX`
+            });
+            setLoading(false);
+            return;
+          }
+
+          toast.info("Updating Group", {
+            description: "Please confirm the transaction in your wallet..."
+          });
+
           txHash = await updateGroupOnChain({
             groupId: group_id,
             price: values.invitationPrice,
@@ -280,31 +342,54 @@ export default function SecondStep({
       setSuccess(true);
       setOriginalValues(values);
 
+      // Refrescar balance después de transacción exitosa
       if (txHash) {
-        toast.success("Group updated on blockchain", {
+        toast.success("Transaction Successful", {
           description: (
             <span>
-              Tx:{" "}
+              View on explorer:{" "}
               <a
                 href={`https://snowtrace.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-blue-500"
               >
-                {txHash.slice(0, 10)}...
+                {txHash.slice(0, 10)}...{txHash.slice(-8)}
               </a>
             </span>
           ),
-          duration: 8000,
+          duration: 10000,
         });
+
+        // Refrescar balance
+        setTimeout(() => {
+          refetchBalance();
+        }, 2000);
       }
 
       methods.next();
     } catch (err: any) {
-      setError(err.message || "Unknown error");
-      toast.error("Error", {
-        description: err.message || "Unknown error occurred"
-      });
+      const errorMessage = err.message || "Unknown error";
+      setError(errorMessage);
+
+      // Manejo de errores específicos
+      if (err.code === 4001 || errorMessage.includes("rejected")) {
+        toast.error("Transaction Rejected", {
+          description: "You rejected the transaction"
+        });
+      } else if (errorMessage.includes("insufficient funds")) {
+        toast.error("Insufficient Funds", {
+          description: `You don't have enough AVAX. Current balance: ${balanceFormatted} AVAX`
+        });
+      } else if (errorMessage.includes("gas")) {
+        toast.error("Gas Error", {
+          description: "Transaction would likely fail. Please check gas settings."
+        });
+      } else {
+        toast.error("Transaction Failed", {
+          description: errorMessage
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -367,26 +452,51 @@ export default function SecondStep({
                 <FormItem>
                   <FormLabel>Owner wallet address</FormLabel>
                   <FormControl>
-                    <div className="flex gap-2 items-center">
-                      <Input
-                        {...field}
-                        className="font-mono"
-                        placeholder="0x..."
-                        value={address || field.value}
-                        readOnly
-                      />
-                      <Button
-                        type="button"
-                        onClick={connect}
-                        disabled={connecting || isConnected}
-                        variant="outline"
-                      >
-                        {connecting
-                          ? "Connecting..."
-                          : isConnected
-                            ? "Connected"
-                            : "Connect Wallet"}
-                      </Button>
+                    <div className="space-y-2">
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          {...field}
+                          className="font-mono"
+                          placeholder="0x..."
+                          value={address || field.value}
+                          readOnly
+                        />
+                        <Button
+                          type="button"
+                          onClick={connect}
+                          disabled={connecting || isConnected}
+                          variant="outline"
+                        >
+                          {connecting
+                            ? "Connecting..."
+                            : isConnected
+                              ? "Connected"
+                              : "Connect Wallet"}
+                        </Button>
+                      </div>
+                      {isConnected && (
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-neutral-500">Balance:</span>
+                            <span className="font-medium">
+                              {isLoadingBalance ? "..." : `${Number(balanceFormatted).toFixed(4)} AVAX`}
+                            </span>
+                          </div>
+                          {!isCorrectNetwork && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={switchToAvalanche}
+                            >
+                              Switch to Avalanche
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      {walletError && (
+                        <p className="text-xs text-red-500">{walletError.message}</p>
+                      )}
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -441,11 +551,18 @@ export default function SecondStep({
               <Button variant={"outline"} onClick={() => methods.prev()}>
                 ← Prev Step
               </Button>
-              <Button 
-                type="submit" 
-                disabled={loading || !isConnected}
+              <Button
+                type="submit"
+                disabled={loading || !isConnected || !isCorrectNetwork}
+                title={
+                  !isConnected
+                    ? "Please connect your wallet"
+                    : !isCorrectNetwork
+                    ? "Please switch to Avalanche network"
+                    : ""
+                }
               >
-                {loading ? "Saving..." : "Next Step →"}
+                {loading ? "Processing..." : "Next Step →"}
               </Button>
             </div>
           </form>
