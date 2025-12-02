@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { CheckCircle2, Loader2, Copy, Info } from "lucide-react";
+import { CheckCircle2, Loader2, Info } from "lucide-react";
 import { CopyInput } from "@/components/ui/CopyInput";
 import {
   Tooltip,
