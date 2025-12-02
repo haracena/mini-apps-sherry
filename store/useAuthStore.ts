@@ -1,15 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
-}
+import type { TelegramUser } from "@/types";
 
 interface AuthState {
   user: TelegramUser | null;
