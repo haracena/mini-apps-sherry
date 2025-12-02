@@ -22,6 +22,7 @@ import { TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent } from "@/components/ui/tooltip";
 import { StepperMethods, TelegramInvitationConfig, TelegramInvitation } from "@/types";
+import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 
 interface ThirdStepProps {
   methods: StepperMethods;
@@ -127,6 +128,22 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                   {copied ? "Copied!" : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-12">
+                    Show QR Code
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle>Share with QR Code</DialogTitle>
+                  <div className="flex flex-col items-center py-4">
+                    <QRCodeGenerator value={shareUrl} size={280} />
+                    <p className="text-sm text-neutral-400 mt-4 text-center">
+                      Scan this QR code to access the invitation link
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="secondary" className="h-12">
