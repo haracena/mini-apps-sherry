@@ -22,6 +22,9 @@ import { TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent } from "@/components/ui/tooltip";
 import { StepperMethods, TelegramInvitationConfig, TelegramInvitation } from "@/types";
+import { QRCodeGenerator } from "@/components/QRCodeGenerator";
+import { exportToCSV } from "@/lib/export";
+import { Download } from "lucide-react";
 
 interface ThirdStepProps {
   methods: StepperMethods;
@@ -129,6 +132,22 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
               </div>
               <Dialog>
                 <DialogTrigger asChild>
+                  <Button variant="outline" className="h-12">
+                    Show QR Code
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle>Share with QR Code</DialogTitle>
+                  <div className="flex flex-col items-center py-4">
+                    <QRCodeGenerator value={shareUrl} size={280} />
+                    <p className="text-sm text-neutral-400 mt-4 text-center">
+                      Scan this QR code to access the invitation link
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
                   <Button variant="secondary" className="h-12">
                     Show mini app info
                   </Button>
@@ -178,7 +197,31 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                 </DialogContent>
               </Dialog>
             </div>
-            <Table className="mt-8 w-full">
+            <div className="mt-8 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Transaction History</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  exportToCSV(
+                    transactions,
+                    `invitations-${group_id}`,
+                    [
+                      { key: "created_at", label: "Date" },
+                      { key: "email", label: "Email" },
+                      { key: "payer_address", label: "Payer Address" },
+                      { key: "status", label: "Status" },
+                      { key: "telegram_invitation_url", label: "Invitation URL" },
+                    ]
+                  );
+                }}
+                disabled={transactions.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+            <Table className="mt-4 w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
