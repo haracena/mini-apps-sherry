@@ -8,9 +8,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, FolderOpen } from "lucide-react";
 import { TelegramInvitationConfig } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function DashboardLayout({
   children,
@@ -72,9 +73,21 @@ export default function DashboardLayout({
               </>
             )}
             {!loading && miniApps.length === 0 && (
-              <span className="text-xs text-neutral-500">
-                No mini apps found
-              </span>
+              <EmptyState
+                icon={FolderOpen}
+                title="No mini apps yet"
+                description="Create your first mini app to start monetizing your Telegram group invitations."
+                action={
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => router.push(`/dashboard/${uuidv4()}`)}
+                  >
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Create mini app
+                  </Button>
+                }
+              />
             )}
             {!loading &&
               miniApps.map((app) => (
