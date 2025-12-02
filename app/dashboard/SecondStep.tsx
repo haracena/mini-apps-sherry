@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useWalletClient, usePublicClient } from "wagmi";
 import { getContract } from "viem";
 import { StepperMethods } from "@/types";
+import { CONTRACTS } from "@/config/contracts";
 
 const formSchema = z
   .object({
@@ -74,8 +75,6 @@ interface SecondStepProps {
   methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
-
-const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396" as `0x${string}`;
 
 export default function SecondStep({
   methods,
@@ -157,7 +156,7 @@ export default function SecondStep({
     if (!publicClient) throw new Error("Public client not ready");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: publicClient,
     });
@@ -183,7 +182,7 @@ export default function SecondStep({
     if (!walletClient) throw new Error("Wallet not connected");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: walletClient,
     });
@@ -211,7 +210,7 @@ export default function SecondStep({
     if (!walletClient) throw new Error("Wallet not connected");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: walletClient,
     });
