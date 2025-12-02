@@ -24,7 +24,9 @@ import { TooltipContent } from "@/components/ui/tooltip";
 import { StepperMethods, TelegramInvitationConfig, TelegramInvitation } from "@/types";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 import { exportToCSV } from "@/lib/export";
-import { Download } from "lucide-react";
+import { Download, Receipt } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/EmptyState";
 
 interface ThirdStepProps {
   methods: StepperMethods;
@@ -252,11 +254,12 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
               <TableBody>
                 {transactions.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-neutral-400"
-                    >
-                      No invitations found.
+                    <TableCell colSpan={5} className="p-0 border-0">
+                      <EmptyState
+                        icon={Receipt}
+                        title="No transactions yet"
+                        description="Once users purchase invitations, they will appear here with payment details and status."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -280,7 +283,19 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                           <span className="text-neutral-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell>{tx.status}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            tx.status === "COMPLETED"
+                              ? "success"
+                              : tx.status === "PENDING"
+                              ? "warning"
+                              : "error"
+                          }
+                        >
+                          {tx.status}
+                        </Badge>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

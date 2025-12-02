@@ -8,10 +8,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
-import { PlusIcon, FolderOpen } from "lucide-react";
+import { PlusIcon, FolderOpen, Menu, X } from "lucide-react";
 import { TelegramInvitationConfig } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 export default function DashboardLayout({
   children,
@@ -22,8 +23,10 @@ export default function DashboardLayout({
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const [miniApps, setMiniApps] = useState<TelegramInvitationConfig[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -58,8 +61,22 @@ export default function DashboardLayout({
         height={982}
         className="absolute top-0 left-0 w-full h-full object-cover -z-10 opacity-20"
       />
-      <div className="grid grid-cols-[280px_1fr] min-h-[85vh] my-4 rounded-lg overflow-hidden">
-        <div className="flex flex-col gap-4 p-4 bg-neutral-900/75 overflow-y-auto">
+      {isMobile && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="fixed top-4 left-4 z-50 md:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
+      )}
+      <div className="grid md:grid-cols-[280px_1fr] grid-cols-1 min-h-[85vh] my-4 rounded-lg overflow-hidden">
+        <div
+          className={`flex flex-col gap-4 p-4 bg-neutral-900/75 overflow-y-auto transition-transform md:translate-x-0 ${
+            isMobile && !sidebarOpen ? "-translate-x-full absolute inset-y-0 w-[280px] z-40" : "relative"
+          }`}
+        >
           <div className="flex flex-col gap-4 h-full">
             <p className="text-base text-neutral-500">Mini Apps Dashboard</p>
             {loading && (
