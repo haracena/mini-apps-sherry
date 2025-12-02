@@ -21,9 +21,10 @@ import { supabase } from "@/lib/supabase-client";
 import { TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent } from "@/components/ui/tooltip";
+import { StepperMethods, TelegramInvitationConfig, TelegramInvitation } from "@/types";
 
 interface ThirdStepProps {
-  methods: any;
+  methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
 
@@ -37,12 +38,12 @@ function shortenUrl(url: string, chars = 28) {
 export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
   const params = useParams();
   const group_id = params.id as string;
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<TelegramInvitationConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const shareUrl = `https://app.sherry.social/action?url=https://mini-apps-sherry.vercel.app/api/telegram-invitation?group_id=${group_id}`;
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<TelegramInvitation[]>([]);
   const [loadingTx, setLoadingTx] = useState(false);
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
       }
       setLoadingTx(false);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchData() {

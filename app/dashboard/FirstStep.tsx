@@ -4,16 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { CheckCircle2, Loader2, Copy, Info } from "lucide-react";
+import { CheckCircle2, Loader2, Info } from "lucide-react";
 import { CopyInput } from "@/components/ui/CopyInput";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StepperMethods } from "@/types";
 
 interface FirstStepProps {
-  methods: any;
+  methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
 
@@ -27,6 +28,7 @@ export default function FirstStep({ methods, setCurrentStep }: FirstStepProps) {
   useEffect(() => {
     setCurrentStep(0);
     checkConnection(); // Check connection on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkConnection = async () => {

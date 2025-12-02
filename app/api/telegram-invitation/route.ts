@@ -15,8 +15,7 @@ import { TelegramGroupInvitationABI } from "@/abi/TelegramGroupInvitation";
 import { supabaseServiceRole } from "@/lib/supabase";
 import { createPublicClient, http } from "viem";
 import { ethers, keccak256, toUtf8Bytes } from "ethers";
-
-const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396";
+import { CONTRACTS } from "@/config/contracts";
 
 const publicClient = createPublicClient({
   chain: avalanche,
@@ -41,7 +40,7 @@ export async function GET(req: NextRequest) {
     }
     // Leer precio y comisión on-chain
     const onchainGroup = (await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       functionName: "getGroup",
       args: [group_id],
@@ -184,7 +183,7 @@ export async function POST(req: NextRequest) {
     // Leer precio y comisión on-chain
     console.log("🔍 Reading on-chain data for group:", group_id);
     const onchainGroup = (await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       functionName: "getGroup",
       args: [group_id],
@@ -214,7 +213,7 @@ export async function POST(req: NextRequest) {
 
     // Obtener el platform fee
     const platformFee = (await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       functionName: "platformFee",
     })) as bigint;
@@ -308,14 +307,14 @@ export async function POST(req: NextRequest) {
       args,
     });
     const tx: TransactionSerializable = {
-      to: CONTRACT_ADDRESS,
+      to: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       data: dataTx,
       value: BigInt(price) + BigInt(platformFee),
       chainId: avalanche.id,
       type: "legacy",
     };
     console.log("📦 Transaction data:", {
-      to: CONTRACT_ADDRESS,
+      to: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       value: (price + platformFee).toString(),
       chainId: avalanche.id,
       data: dataTx,

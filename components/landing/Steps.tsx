@@ -1,11 +1,4 @@
-import {
-  UserCheck,
-  Blocks,
-  Share2,
-  DollarSign,
-  Settings,
-  UserPlus,
-} from "lucide-react";
+import { DollarSign, Settings, UserPlus } from "lucide-react";
 
 export default function Steps() {
   return (

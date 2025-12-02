@@ -22,6 +22,8 @@ import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
 import { useWalletClient, usePublicClient } from "wagmi";
 import { getContract } from "viem";
+import { StepperMethods } from "@/types";
+import { CONTRACTS } from "@/config/contracts";
 
 const formSchema = z
   .object({
@@ -70,11 +72,9 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 interface SecondStepProps {
-  methods: any;
+  methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
-
-const CONTRACT_ADDRESS = "0x9Da5D4De75832CD63666AC738837B88fCf4b3396" as `0x${string}`;
 
 export default function SecondStep({
   methods,
@@ -119,6 +119,7 @@ export default function SecondStep({
   useEffect(() => {
     setCurrentStep(1);
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -155,7 +156,7 @@ export default function SecondStep({
     if (!publicClient) throw new Error("Public client not ready");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: publicClient,
     });
@@ -181,7 +182,7 @@ export default function SecondStep({
     if (!walletClient) throw new Error("Wallet not connected");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: walletClient,
     });
@@ -209,7 +210,7 @@ export default function SecondStep({
     if (!walletClient) throw new Error("Wallet not connected");
     
     const contract = getContract({
-      address: CONTRACT_ADDRESS,
+      address: CONTRACTS.TELEGRAM_GROUP_INVITATION,
       abi: TelegramGroupInvitationABI,
       client: walletClient,
     });

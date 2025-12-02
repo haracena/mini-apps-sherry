@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import { PlusIcon } from "lucide-react";
+import { TelegramInvitationConfig } from "@/types";
 
 export default function DashboardLayout({
   children,
@@ -17,7 +18,7 @@ export default function DashboardLayout({
 }) {
   const user = useAuthStore((state) => state.user);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
-  const [miniApps, setMiniApps] = useState<any[]>([]);
+  const [miniApps, setMiniApps] = useState<TelegramInvitationConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
