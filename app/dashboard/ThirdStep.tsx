@@ -283,7 +283,19 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
                           <span className="text-neutral-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell>{tx.status}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            tx.status === "COMPLETED"
+                              ? "success"
+                              : tx.status === "PENDING"
+                              ? "warning"
+                              : "error"
+                          }
+                        >
+                          {tx.status}
+                        </Badge>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
