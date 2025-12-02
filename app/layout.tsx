@@ -49,14 +49,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${poppins.variable} antialiased`}>
-         <Web3Provider>
+        <Web3Provider>
+          <Navbar />
           {children}
+          <Footer />
           <Toaster position="top-right" />
         </Web3Provider>
-        <Navbar />
-        <Toaster />
-        {children}
-        <Footer />
       </body>
     </html>
   );
