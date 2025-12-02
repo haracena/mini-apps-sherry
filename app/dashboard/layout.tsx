@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import { PlusIcon } from "lucide-react";
 import { TelegramInvitationConfig } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLayout({
   children,
@@ -61,7 +62,14 @@ export default function DashboardLayout({
           <div className="flex flex-col gap-4 h-full">
             <p className="text-base text-neutral-500">Mini Apps Dashboard</p>
             {loading && (
-              <span className="text-xs text-neutral-500">Loading...</span>
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Skeleton className="size-8 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </>
             )}
             {!loading && miniApps.length === 0 && (
               <span className="text-xs text-neutral-500">
