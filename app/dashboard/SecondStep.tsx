@@ -120,6 +120,7 @@ export default function SecondStep({
   useEffect(() => {
     setCurrentStep(1);
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

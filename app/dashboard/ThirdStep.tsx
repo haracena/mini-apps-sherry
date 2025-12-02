@@ -67,6 +67,7 @@ export default function ThirdStep({ methods, setCurrentStep }: ThirdStepProps) {
       }
       setLoadingTx(false);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchData() {

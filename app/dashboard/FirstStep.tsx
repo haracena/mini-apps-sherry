@@ -28,6 +28,7 @@ export default function FirstStep({ methods, setCurrentStep }: FirstStepProps) {
   useEffect(() => {
     setCurrentStep(0);
     checkConnection(); // Check connection on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkConnection = async () => {
