@@ -22,6 +22,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { toast } from "sonner";
 import { useWalletClient, usePublicClient } from "wagmi";
 import { getContract } from "viem";
+import { StepperMethods } from "@/types";
 
 const formSchema = z
   .object({
@@ -70,7 +71,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 interface SecondStepProps {
-  methods: any;
+  methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
 

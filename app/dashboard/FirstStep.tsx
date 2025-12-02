@@ -11,9 +11,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { StepperMethods } from "@/types";
 
 interface FirstStepProps {
-  methods: any;
+  methods: StepperMethods;
   setCurrentStep: (step: number) => void;
 }
 
