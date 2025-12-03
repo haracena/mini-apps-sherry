@@ -86,3 +86,34 @@ export interface SpinResult {
   currentStreak: number;
   transactionHash: string;
 }
+
+// NFT types
+export interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  attributes?: Array<{
+    trait_type: string;
+    value: string | number;
+  }>;
+}
+
+export interface MintedNFT {
+  tokenId: bigint;
+  tokenURI: string;
+  owner: string;
+  transactionHash: string;
+  timestamp: bigint;
+}
+
+export interface PinataUploadResponse {
+  IpfsHash: string;
+  PinSize: number;
+  Timestamp: string;
+}
+
+export interface NFTFormData {
+  name: string;
+  description: string;
+  image: File | null;
+}
