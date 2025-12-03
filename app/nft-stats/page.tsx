@@ -7,6 +7,7 @@ import { Wallet, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageTransition } from "@/components/PageTransition";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { StatsCards } from "@/components/nft/StatsCards";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
@@ -178,16 +179,43 @@ export default function NFTStatsPage() {
             />
           </PageTransition>
 
-          <PageTransition delay={100}>
-            <div className="max-w-6xl mx-auto mt-8">
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center">
-                  <div className="animate-spin h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
-                  <p className="text-white/60">Loading statistics...</p>
+          <div className="max-w-6xl mx-auto mt-8 space-y-8">
+            {/* Stats Cards Skeleton */}
+            <PageTransition delay={100}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 rounded-xl p-6"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <Skeleton className="w-9 h-9 rounded-lg" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                ))}
+              </div>
+            </PageTransition>
+
+            {/* Attribute Distribution Skeleton */}
+            <PageTransition delay={150}>
+              <div className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 rounded-xl p-6">
+                <Skeleton className="h-6 w-40 mb-6" />
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                      <Skeleton className="w-full h-2 rounded-full" />
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          </PageTransition>
+            </PageTransition>
+          </div>
         </div>
       </div>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface SearchBarProps {
@@ -19,14 +19,23 @@ export function SearchBar({
   totalCount,
 }: SearchBarProps) {
   const [localValue, setLocalValue] = useState(value);
+  const [isDebouncing, setIsDebouncing] = useState(false);
 
   // Debounce the search input
   useEffect(() => {
+    if (localValue !== value) {
+      setIsDebouncing(true);
+    }
+
     const timer = setTimeout(() => {
       onChange(localValue);
+      setIsDebouncing(false);
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setIsDebouncing(false);
+    };
   }, [localValue, onChange]);
 
   const handleClear = () => {
@@ -38,7 +47,11 @@ export function SearchBar({
     <div className="space-y-2">
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-white/40" />
+          {isDebouncing ? (
+            <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />
+          ) : (
+            <Search className="h-5 w-5 text-white/40" />
+          )}
         </div>
         <input
           type="text"
