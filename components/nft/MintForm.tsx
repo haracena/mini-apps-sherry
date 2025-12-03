@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatEther } from "viem";
+import { toast } from "sonner";
 import { ImageUpload } from "./ImageUpload";
 import { MintSuccessModal } from "./MintSuccessModal";
 import { useNFTMint } from "@/hooks/useNFTMint";
@@ -28,9 +29,30 @@ export function MintForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.image) return;
+    if (!formData.image) {
+      toast.error("Please select an image");
+      return;
+    }
     await mint(formData);
   };
+
+  // Show toast on upload error
+  useEffect(() => {
+    if (uploadError) {
+      toast.error("Upload failed", {
+        description: uploadError,
+      });
+    }
+  }, [uploadError]);
+
+  // Show toast on mint success
+  useEffect(() => {
+    if (mintedNFT && !isUploading && !isMinting) {
+      toast.success("NFT minted successfully!", {
+        description: `Token ID: #${mintedNFT.tokenId.toString()}`,
+      });
+    }
+  }, [mintedNFT, isUploading, isMinting]);
 
   const handleCloseModal = () => {
     // Reset form after successful mint
@@ -111,13 +133,6 @@ export function MintForm() {
           <p className="text-2xl font-bold text-white">
             {formatEther(mintPrice)} AVAX
           </p>
-        </div>
-      )}
-
-      {/* Error Display */}
-      {uploadError && (
-        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-sm text-red-400">{uploadError}</p>
         </div>
       )}
 
