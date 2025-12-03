@@ -73,19 +73,36 @@ export function NFTPreview({ formData }: NFTPreviewProps) {
         </div>
 
         {/* Metadata Preview */}
-        <div className="space-y-2">
-          <h3 className="text-white font-semibold text-lg truncate">
-            {formData.name || (
-              <span className="text-white/40 italic">NFT Name</span>
-            )}
-          </h3>
-          <p className="text-white/60 text-sm line-clamp-3 leading-relaxed min-h-[3.6rem]">
-            {formData.description || (
-              <span className="text-white/30 italic">
-                Your NFT description will appear here...
-              </span>
-            )}
-          </p>
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-white font-semibold text-lg truncate">
+              {formData.name || (
+                <span className="text-white/40 italic">NFT Name</span>
+              )}
+            </h3>
+            <p className="text-white/60 text-sm line-clamp-3 leading-relaxed min-h-[3.6rem]">
+              {formData.description || (
+                <span className="text-white/30 italic">
+                  Your NFT description will appear here...
+                </span>
+              )}
+            </p>
+          </div>
+
+          {/* Attributes Preview */}
+          {formData.attributes && formData.attributes.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+              {formData.attributes.filter(attr => attr.trait_type && attr.value).map((attr, index) => (
+                <div
+                  key={index}
+                  className="px-2 py-1 bg-purple-500/10 border border-purple-500/20 rounded text-xs"
+                >
+                  <span className="text-white/50">{attr.trait_type}: </span>
+                  <span className="font-medium text-purple-300">{attr.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer Preview */}

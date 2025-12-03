@@ -6,7 +6,7 @@ import { parseEther } from "viem";
 import imageCompression from "browser-image-compression";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
-import type { NFTFormData, MintedNFT } from "@/types";
+import type { NFTFormData, NFTAttribute, MintedNFT } from "@/types";
 
 export function useNFTMint() {
   const { address } = useAccount();
@@ -120,7 +120,8 @@ export function useNFTMint() {
   const uploadMetadata = async (
     name: string,
     description: string,
-    imageUrl: string
+    imageUrl: string,
+    attributes?: NFTAttribute[]
   ): Promise<string> => {
     // Upload with retry mechanism
     const result = await retryWithBackoff(async () => {
@@ -133,6 +134,7 @@ export function useNFTMint() {
           name,
           description,
           image: imageUrl,
+          ...(attributes && attributes.length > 0 && { attributes }),
         }),
       });
 
@@ -166,7 +168,8 @@ export function useNFTMint() {
       const tokenURI = await uploadMetadata(
         formData.name,
         formData.description,
-        imageUrl
+        imageUrl,
+        formData.attributes
       );
 
       setIsUploading(false);

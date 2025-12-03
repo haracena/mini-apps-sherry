@@ -7,6 +7,7 @@ import { AlertTriangle } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { MintSuccessModal } from "./MintSuccessModal";
 import { NFTPreview } from "./NFTPreview";
+import { AttributeBuilder } from "./AttributeBuilder";
 import { PageTransition } from "@/components/PageTransition";
 import { useNFTMint } from "@/hooks/useNFTMint";
 import { useNetworkCheck } from "@/hooks/useNetworkCheck";
@@ -17,6 +18,7 @@ export function MintForm() {
     name: "",
     description: "",
     image: null,
+    attributes: [],
   });
 
   const {
@@ -71,6 +73,7 @@ export function MintForm() {
       name: "",
       description: "",
       image: null,
+      attributes: [],
     });
   };
 
@@ -173,6 +176,15 @@ export function MintForm() {
           onImageSelect={(image) => setFormData({ ...formData, image })}
         />
         </div>
+      </PageTransition>
+
+      {/* Attributes */}
+      <PageTransition delay={150}>
+        <AttributeBuilder
+          attributes={formData.attributes}
+          onChange={(attributes) => setFormData({ ...formData, attributes })}
+          disabled={isLoading}
+        />
       </PageTransition>
 
       {/* Mint Price Display */}
