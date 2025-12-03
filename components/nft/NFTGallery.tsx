@@ -10,6 +10,7 @@ import { NFTCardSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTransition } from "@/components/PageTransition";
 import { SearchBar } from "./SearchBar";
+import { FilterControls, SortOption } from "./FilterControls";
 import { fetchFromIPFS } from "@/utils/ipfs";
 import type { NFTMetadata } from "@/types";
 
@@ -21,6 +22,8 @@ interface NFTWithMetadata {
 export function NFTGallery() {
   const { address, isConnected } = useAccount();
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [nftMetadata, setNftMetadata] = useState<NFTWithMetadata[]>([]);
 
   const { data: tokenIds, isLoading } = useReadContract({
@@ -66,22 +69,71 @@ export function NFTGallery() {
     fetchAllMetadata();
   }, [tokenIds]);
 
-  // Filter NFTs based on search query
-  const filteredNFTs = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return nftMetadata;
+  // Extract unique attribute types from all NFTs
+  const availableAttributes = useMemo(() => {
+    const attributeSet = new Set<string>();
+
+    nftMetadata.forEach((nft) => {
+      if (nft.metadata?.attributes) {
+        nft.metadata.attributes.forEach((attr) => {
+          if (attr.trait_type) {
+            attributeSet.add(`${attr.trait_type}: ${attr.value}`);
+          }
+        });
+      }
+    });
+
+    return Array.from(attributeSet).sort();
+  }, [nftMetadata]);
+
+  // Filter and sort NFTs
+  const processedNFTs = useMemo(() => {
+    let result = [...nftMetadata];
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((nft) => {
+        if (!nft.metadata) return false;
+
+        const nameMatch = nft.metadata.name?.toLowerCase().includes(query);
+        const descMatch = nft.metadata.description?.toLowerCase().includes(query);
+
+        return nameMatch || descMatch;
+      });
     }
 
-    const query = searchQuery.toLowerCase();
-    return nftMetadata.filter((nft) => {
-      if (!nft.metadata) return false;
+    // Filter by attributes
+    if (selectedAttributes.length > 0) {
+      result = result.filter((nft) => {
+        if (!nft.metadata?.attributes) return false;
 
-      const nameMatch = nft.metadata.name?.toLowerCase().includes(query);
-      const descMatch = nft.metadata.description?.toLowerCase().includes(query);
+        return selectedAttributes.every((selectedAttr) => {
+          return nft.metadata!.attributes!.some((attr) => {
+            return `${attr.trait_type}: ${attr.value}` === selectedAttr;
+          });
+        });
+      });
+    }
 
-      return nameMatch || descMatch;
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return Number(b.tokenId) - Number(a.tokenId);
+        case "oldest":
+          return Number(a.tokenId) - Number(b.tokenId);
+        case "name-asc":
+          return (a.metadata?.name || "").localeCompare(b.metadata?.name || "");
+        case "name-desc":
+          return (b.metadata?.name || "").localeCompare(a.metadata?.name || "");
+        default:
+          return 0;
+      }
     });
-  }, [nftMetadata, searchQuery]);
+
+    return result;
+  }, [nftMetadata, searchQuery, selectedAttributes, sortBy]);
 
   if (!isConnected) {
     return (
@@ -129,8 +181,17 @@ export function NFTGallery() {
         value={searchQuery}
         onChange={setSearchQuery}
         placeholder="Search by name or description..."
-        resultCount={filteredNFTs.length}
+        resultCount={processedNFTs.length}
         totalCount={nftMetadata.length}
+      />
+
+      {/* Filter and Sort Controls */}
+      <FilterControls
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        selectedAttributes={selectedAttributes}
+        onAttributeChange={setSelectedAttributes}
+        availableAttributes={availableAttributes}
       />
 
       {/* Loading state while fetching metadata */}
@@ -140,23 +201,32 @@ export function NFTGallery() {
             <NFTCardSkeleton key={i} />
           ))}
         </div>
-      ) : filteredNFTs.length === 0 ? (
-        /* No results from search */
+      ) : processedNFTs.length === 0 ? (
+        /* No results from search/filter */
         <EmptyState
           icon={ImagePlus}
           title="No NFTs Found"
           description={
-            searchQuery
-              ? `No NFTs match "${searchQuery}". Try a different search term.`
+            searchQuery || selectedAttributes.length > 0
+              ? "No NFTs match your search or filter criteria. Try adjusting your filters."
               : "No NFTs to display."
           }
-          actionLabel={searchQuery ? "Clear Search" : undefined}
-          onAction={searchQuery ? () => setSearchQuery("") : undefined}
+          actionLabel={
+            searchQuery || selectedAttributes.length > 0 ? "Clear Filters" : undefined
+          }
+          onAction={
+            searchQuery || selectedAttributes.length > 0
+              ? () => {
+                  setSearchQuery("");
+                  setSelectedAttributes([]);
+                }
+              : undefined
+          }
         />
       ) : (
-        /* Display filtered NFTs */
+        /* Display filtered and sorted NFTs */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredNFTs.map((nft, index) => (
+          {processedNFTs.map((nft, index) => (
             <PageTransition key={nft.tokenId.toString()} delay={index * 50}>
               <NFTCard tokenId={nft.tokenId} />
             </PageTransition>
