@@ -33,6 +33,18 @@ export default function Navbar() {
           >
             Daily Streak
           </Link>
+          <Link
+            href="/nft-mint"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Mint NFT
+          </Link>
+          <Link
+            href="/nft-gallery"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            My NFTs
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           {user ? (
