@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useState, useEffect } from "react";
+import { useAccount, useWatchContractEvent } from "wagmi";
 import { Wheel } from "@/components/Wheel";
 import { StreakCounter } from "@/components/StreakCounter";
 import { PointsDisplay } from "@/components/PointsDisplay";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { Confetti } from "@/components/Confetti";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDailyStreak } from "@/hooks/useDailyStreak";
 import { calculateWinRotation } from "@/config/wheel-prizes";
+import { DailyStreakABI } from "@/abi/DailyStreak";
+import { CONTRACTS } from "@/config/contracts";
 import { Loader2, Wallet } from "lucide-react";
 
 export default function DailyStreakPage() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const {
     totalPoints,
     currentStreak,
@@ -28,6 +31,22 @@ export default function DailyStreakPage() {
 
   const [rotation, setRotation] = useState(0);
   const [wonPoints, setWonPoints] = useState<number | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Watch for SpinCompleted event
+  useWatchContractEvent({
+    address: CONTRACTS.DAILY_STREAK,
+    abi: DailyStreakABI,
+    eventName: "SpinCompleted",
+    onLogs(logs) {
+      logs.forEach((log) => {
+        if (log.args.player?.toLowerCase() === address?.toLowerCase()) {
+          const points = Number(log.args.points);
+          simulateWin(points);
+        }
+      });
+    },
+  });
 
   const handleSpin = async () => {
     if (!canSpin || isSpinning) return;
@@ -49,6 +68,7 @@ export default function DailyStreakPage() {
     const targetRotation = calculateWinRotation(points);
     setRotation(targetRotation);
     setWonPoints(points);
+    setShowConfetti(true);
 
     setTimeout(() => {
       setWonPoints(null);
@@ -147,6 +167,9 @@ export default function DailyStreakPage() {
           </ul>
         </div>
       </div>
+
+      {/* Confetti */}
+      <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
     </div>
   );
 }
