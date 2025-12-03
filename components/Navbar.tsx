@@ -39,6 +39,12 @@ export default function Navbar() {
           >
             Mint NFT
           </Link>
+          <Link
+            href="/nft-gallery"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            My NFTs
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           {user ? (
