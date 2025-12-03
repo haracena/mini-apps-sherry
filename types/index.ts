@@ -62,3 +62,27 @@ export interface Transaction {
   status: 'PENDING' | 'CONFIRMED' | 'FAILED';
   created_at: string;
 }
+
+// Daily Streak types
+export interface PlayerData {
+  totalPoints: bigint;
+  currentStreak: bigint;
+  lastSpinDay: bigint;
+  lastSpinTimestamp: bigint;
+}
+
+export interface WheelPrize {
+  id: number;
+  minPoints: number;
+  maxPoints: number;
+  probability: number;
+  color: string;
+  label: string;
+}
+
+export interface SpinResult {
+  points: number;
+  newTotalPoints: number;
+  currentStreak: number;
+  transactionHash: string;
+}

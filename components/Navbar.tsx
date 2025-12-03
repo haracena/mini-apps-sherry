@@ -15,17 +15,25 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-neutral-950/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link
-          className="duration-300 transition-all active:scale-95 hover:opacity-80"
-          href="/"
-        >
-          <Image
-            src="/assets/images/logo-large.png"
-            alt="Logo"
-            width={172}
-            height={32}
-          />
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            className="duration-300 transition-all active:scale-95 hover:opacity-80"
+            href="/"
+          >
+            <Image
+              src="/assets/images/logo-large.png"
+              alt="Logo"
+              width={172}
+              height={32}
+            />
+          </Link>
+          <Link
+            href="/daily-streak"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Daily Streak
+          </Link>
+        </div>
         <div className="flex items-center gap-4">
           {user ? (
             <div
