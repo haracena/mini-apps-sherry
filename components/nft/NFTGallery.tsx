@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageTransition } from "@/components/PageTransition";
 import { SearchBar } from "./SearchBar";
 import { FilterControls, SortOption } from "./FilterControls";
+import { Pagination } from "@/components/ui/Pagination";
 import { fetchFromIPFS } from "@/utils/ipfs";
 import type { NFTMetadata } from "@/types";
 
@@ -19,11 +20,14 @@ interface NFTWithMetadata {
   metadata: NFTMetadata | null;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export function NFTGallery() {
   const { address, isConnected } = useAccount();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [nftMetadata, setNftMetadata] = useState<NFTWithMetadata[]>([]);
 
   const { data: tokenIds, isLoading } = useReadContract({
@@ -86,6 +90,11 @@ export function NFTGallery() {
     return Array.from(attributeSet).sort();
   }, [nftMetadata]);
 
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedAttributes, sortBy]);
+
   // Filter and sort NFTs
   const processedNFTs = useMemo(() => {
     let result = [...nftMetadata];
@@ -134,6 +143,20 @@ export function NFTGallery() {
 
     return result;
   }, [nftMetadata, searchQuery, selectedAttributes, sortBy]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(processedNFTs.length / ITEMS_PER_PAGE);
+  const paginatedNFTs = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return processedNFTs.slice(startIndex, endIndex);
+  }, [processedNFTs, currentPage]);
+
+  // Scroll to top on page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   if (!isConnected) {
     return (
@@ -225,13 +248,24 @@ export function NFTGallery() {
         />
       ) : (
         /* Display filtered and sorted NFTs */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {processedNFTs.map((nft, index) => (
-            <PageTransition key={nft.tokenId.toString()} delay={index * 50}>
-              <NFTCard tokenId={nft.tokenId} />
-            </PageTransition>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedNFTs.map((nft, index) => (
+              <PageTransition key={nft.tokenId.toString()} delay={index * 50}>
+                <NFTCard tokenId={nft.tokenId} />
+              </PageTransition>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={ITEMS_PER_PAGE}
+            totalItems={processedNFTs.length}
+          />
+        </>
       )}
     </div>
   );
