@@ -12,6 +12,7 @@ export function useNFTMint() {
   const { address } = useAccount();
   const [isUploading, setIsUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [mintedNFT, setMintedNFT] = useState<MintedNFT | null>(null);
 
@@ -44,6 +45,33 @@ export function useNFTMint() {
     },
   });
 
+  // Utility function for retry with exponential backoff
+  const retryWithBackoff = async <T,>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    delay: number = 1000
+  ): Promise<T> => {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        setRetryCount(attempt);
+        return await fn();
+      } catch (error) {
+        lastError = error as Error;
+
+        if (attempt < maxRetries - 1) {
+          const waitTime = delay * Math.pow(2, attempt);
+          console.log(`Attempt ${attempt + 1} failed. Retrying in ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+
+    setRetryCount(0);
+    throw lastError || new Error("Max retries exceeded");
+  };
+
   const uploadImage = async (file: File): Promise<string> => {
     setIsCompressing(true);
 
@@ -62,23 +90,29 @@ export function useNFTMint() {
 
       setIsCompressing(false);
 
-      const formData = new FormData();
-      formData.append("file", compressedFile, file.name);
+      // Upload with retry mechanism
+      const result = await retryWithBackoff(async () => {
+        const formData = new FormData();
+        formData.append("file", compressedFile, file.name);
 
-      const response = await fetch("/api/nft/upload-image", {
-        method: "POST",
-        body: formData,
+        const response = await fetch("/api/nft/upload-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to upload image");
+        }
+
+        const data = await response.json();
+        return data.imageUrl;
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to upload image");
-      }
-
-      const data = await response.json();
-      return data.imageUrl;
+      return result;
     } catch (error) {
       setIsCompressing(false);
+      setRetryCount(0);
       throw error;
     }
   };
@@ -88,25 +122,30 @@ export function useNFTMint() {
     description: string,
     imageUrl: string
   ): Promise<string> => {
-    const response = await fetch("/api/nft/upload-metadata", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        description,
-        image: imageUrl,
-      }),
+    // Upload with retry mechanism
+    const result = await retryWithBackoff(async () => {
+      const response = await fetch("/api/nft/upload-metadata", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          image: imageUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload metadata");
+      }
+
+      const data = await response.json();
+      return data.tokenURI;
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to upload metadata");
-    }
-
-    const data = await response.json();
-    return data.tokenURI;
+    return result;
   };
 
   const mint = async (formData: NFTFormData) => {
@@ -114,6 +153,7 @@ export function useNFTMint() {
       setIsUploading(true);
       setUploadError(null);
       setMintedNFT(null);
+      setRetryCount(0);
 
       if (!formData.image) {
         throw new Error("No image provided");
@@ -130,6 +170,7 @@ export function useNFTMint() {
       );
 
       setIsUploading(false);
+      setRetryCount(0);
 
       // Mint NFT with the token URI
       writeContract({
@@ -141,6 +182,7 @@ export function useNFTMint() {
       });
     } catch (error) {
       setIsUploading(false);
+      setRetryCount(0);
       setUploadError(
         error instanceof Error ? error.message : "Failed to mint NFT"
       );
@@ -154,6 +196,7 @@ export function useNFTMint() {
     isMinting,
     isUploading,
     isCompressing,
+    retryCount,
     uploadError,
     mintedNFT,
   };

@@ -21,6 +21,7 @@ export function MintForm() {
     isMinting,
     isUploading,
     isCompressing,
+    retryCount,
     uploadError,
     mintedNFT,
   } = useNFTMint();
@@ -137,7 +138,9 @@ export function MintForm() {
             {isCompressing
               ? "Compressing image..."
               : isUploading
-              ? "Uploading to IPFS..."
+              ? retryCount > 0
+                ? `Uploading to IPFS (attempt ${retryCount + 1}/3)...`
+                : "Uploading to IPFS..."
               : "Minting NFT..."}
           </span>
         ) : (
