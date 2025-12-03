@@ -88,14 +88,16 @@ export interface SpinResult {
 }
 
 // NFT types
+export interface NFTAttribute {
+  trait_type: string;
+  value: string | number;
+}
+
 export interface NFTMetadata {
   name: string;
   description: string;
   image: string;
-  attributes?: Array<{
-    trait_type: string;
-    value: string | number;
-  }>;
+  attributes?: NFTAttribute[];
 }
 
 export interface MintedNFT {
@@ -116,4 +118,5 @@ export interface NFTFormData {
   name: string;
   description: string;
   image: File | null;
+  attributes: NFTAttribute[];
 }

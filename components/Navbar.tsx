@@ -15,9 +15,9 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-neutral-950/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 md:gap-6 overflow-x-auto">
           <Link
-            className="duration-300 transition-all active:scale-95 hover:opacity-80"
+            className="duration-300 transition-all active:scale-95 hover:opacity-80 flex-shrink-0"
             href="/"
           >
             <Image
@@ -25,25 +25,45 @@ export default function Navbar() {
               alt="Logo"
               width={172}
               height={32}
+              className="hidden sm:block"
+            />
+            <Image
+              src="/assets/images/logo-large.png"
+              alt="Logo"
+              width={120}
+              height={22}
+              className="sm:hidden"
             />
           </Link>
           <Link
             href="/daily-streak"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-xs md:text-sm font-medium hover:text-primary transition-colors whitespace-nowrap"
           >
             Daily Streak
           </Link>
           <Link
             href="/nft-mint"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-xs md:text-sm font-medium hover:text-primary transition-colors whitespace-nowrap"
           >
             Mint NFT
           </Link>
           <Link
             href="/nft-gallery"
-            className="text-sm font-medium hover:text-primary transition-colors"
+            className="text-xs md:text-sm font-medium hover:text-primary transition-colors whitespace-nowrap"
           >
             My NFTs
+          </Link>
+          <Link
+            href="/nft-stats"
+            className="text-xs md:text-sm font-medium hover:text-primary transition-colors whitespace-nowrap hidden sm:inline"
+          >
+            NFT Stats
+          </Link>
+          <Link
+            href="/nft-settings"
+            className="text-xs md:text-sm font-medium hover:text-primary transition-colors whitespace-nowrap hidden sm:inline"
+          >
+            Settings
           </Link>
         </div>
         <div className="flex items-center gap-4">

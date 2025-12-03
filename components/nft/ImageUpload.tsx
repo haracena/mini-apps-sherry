@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import Image from "next/image";
 import { Upload, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface ImageUploadProps {
   onImageSelect: (file: File | null) => void;
@@ -12,23 +13,25 @@ interface ImageUploadProps {
 export function ImageUpload({ onImageSelect, selectedImage }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const validateFile = (file: File): boolean => {
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
     if (!validTypes.includes(file.type)) {
-      setError("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed");
+      toast.error("Invalid file type", {
+        description: "Only JPEG, PNG, GIF, and WebP are allowed"
+      });
       return false;
     }
 
     if (file.size > maxSize) {
-      setError("File size exceeds 10MB limit");
+      toast.error("File too large", {
+        description: `Maximum file size is 10MB (received ${(file.size / 1024 / 1024).toFixed(2)}MB)`
+      });
       return false;
     }
 
-    setError(null);
     return true;
   };
 
@@ -76,7 +79,6 @@ export function ImageUpload({ onImageSelect, selectedImage }: ImageUploadProps) 
   const clearImage = () => {
     onImageSelect(null);
     setPreview(null);
-    setError(null);
   };
 
   return (
@@ -129,9 +131,6 @@ export function ImageUpload({ onImageSelect, selectedImage }: ImageUploadProps) 
             </p>
           </div>
         </div>
-      )}
-      {error && (
-        <p className="text-sm text-red-400">{error}</p>
       )}
     </div>
   );
