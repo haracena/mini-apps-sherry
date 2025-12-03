@@ -7,6 +7,7 @@ import { ExternalLink, ImageIcon } from "lucide-react";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
 import { fetchFromIPFS, getIPFSImageUrl } from "@/utils/ipfs";
+import { NFTCardSkeleton } from "@/components/ui/Skeleton";
 import type { NFTMetadata } from "@/types";
 
 interface NFTCardProps {
@@ -55,13 +56,7 @@ export function NFTCard({ tokenId }: NFTCardProps) {
   }, [tokenURI]);
 
   if (!metadata || isLoadingMetadata) {
-    return (
-      <div className="bg-white/5 border border-purple-500/30 rounded-xl p-4 animate-pulse">
-        <div className="aspect-square bg-white/10 rounded-lg mb-3" />
-        <div className="h-4 bg-white/10 rounded mb-2" />
-        <div className="h-3 bg-white/10 rounded w-2/3" />
-      </div>
-    );
+    return <NFTCardSkeleton />;
   }
 
   return (

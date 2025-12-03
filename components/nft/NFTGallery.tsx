@@ -4,6 +4,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
 import { NFTCard } from "./NFTCard";
+import { NFTCardSkeleton } from "@/components/ui/Skeleton";
 
 export function NFTGallery() {
   const { address, isConnected } = useAccount();
@@ -30,14 +31,7 @@ export function NFTGallery() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-white/5 border border-purple-500/30 rounded-lg p-4 animate-pulse"
-          >
-            <div className="aspect-square bg-white/10 rounded-lg mb-3" />
-            <div className="h-4 bg-white/10 rounded mb-2" />
-            <div className="h-3 bg-white/10 rounded w-2/3" />
-          </div>
+          <NFTCardSkeleton key={i} />
         ))}
       </div>
     );
