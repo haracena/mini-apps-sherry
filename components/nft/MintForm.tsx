@@ -5,6 +5,7 @@ import { formatEther } from "viem";
 import { toast } from "sonner";
 import { ImageUpload } from "./ImageUpload";
 import { MintSuccessModal } from "./MintSuccessModal";
+import { NFTPreview } from "./NFTPreview";
 import { useNFTMint } from "@/hooks/useNFTMint";
 import type { NFTFormData } from "@/types";
 
@@ -71,7 +72,9 @@ export function MintForm() {
   const isLoading = isMinting || isUploading || isCompressing;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="grid lg:grid-cols-2 gap-8">
+      {/* Form Section */}
+      <form onSubmit={handleSubmit} className="space-y-6">
       {/* NFT Name */}
       <div className="space-y-2">
         <label htmlFor="name" className="block text-sm font-medium text-white">
@@ -163,8 +166,14 @@ export function MintForm() {
         )}
       </button>
 
-      {/* Success Modal */}
-      <MintSuccessModal nft={mintedNFT} onClose={handleCloseModal} />
-    </form>
+        {/* Success Modal */}
+        <MintSuccessModal nft={mintedNFT} onClose={handleCloseModal} />
+      </form>
+
+      {/* Preview Section */}
+      <div className="lg:sticky lg:top-6 lg:self-start">
+        <NFTPreview formData={formData} />
+      </div>
+    </div>
   );
 }
