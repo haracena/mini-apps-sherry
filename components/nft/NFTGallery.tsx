@@ -7,6 +7,7 @@ import { MintableNFTABI } from "@/abi/MintableNFT";
 import { NFTCard } from "./NFTCard";
 import { NFTCardSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageTransition } from "@/components/PageTransition";
 
 export function NFTGallery() {
   const { address, isConnected } = useAccount();
@@ -60,11 +61,10 @@ export function NFTGallery() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {tokenIds.map((tokenId) => (
-        <NFTCard
-          key={tokenId.toString()}
-          tokenId={tokenId}
-        />
+      {tokenIds.map((tokenId, index) => (
+        <PageTransition key={tokenId.toString()} delay={index * 50}>
+          <NFTCard tokenId={tokenId} />
+        </PageTransition>
       ))}
     </div>
   );

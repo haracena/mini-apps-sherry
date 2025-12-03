@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ImageUpload } from "./ImageUpload";
 import { MintSuccessModal } from "./MintSuccessModal";
 import { NFTPreview } from "./NFTPreview";
+import { PageTransition } from "@/components/PageTransition";
 import { useNFTMint } from "@/hooks/useNFTMint";
 import type { NFTFormData } from "@/types";
 
@@ -76,7 +77,8 @@ export function MintForm() {
       {/* Form Section */}
       <form onSubmit={handleSubmit} className="space-y-6">
       {/* NFT Name */}
-      <div className="space-y-2">
+      <PageTransition delay={0}>
+        <div className="space-y-2">
         <label htmlFor="name" className="block text-sm font-medium text-white">
           NFT Name
         </label>
@@ -92,10 +94,12 @@ export function MintForm() {
                    transition-all duration-200"
           disabled={isLoading}
         />
-      </div>
+        </div>
+      </PageTransition>
 
       {/* NFT Description */}
-      <div className="space-y-2">
+      <PageTransition delay={50}>
+        <div className="space-y-2">
         <label
           htmlFor="description"
           className="block text-sm font-medium text-white"
@@ -116,10 +120,12 @@ export function MintForm() {
                    transition-all duration-200 resize-none"
           disabled={isLoading}
         />
-      </div>
+        </div>
+      </PageTransition>
 
       {/* Image Upload */}
-      <div className="space-y-2">
+      <PageTransition delay={100}>
+        <div className="space-y-2">
         <label className="block text-sm font-medium text-white">
           NFT Image
         </label>
@@ -127,20 +133,24 @@ export function MintForm() {
           selectedImage={formData.image}
           onImageSelect={(image) => setFormData({ ...formData, image })}
         />
-      </div>
+        </div>
+      </PageTransition>
 
       {/* Mint Price Display */}
       {!isPriceLoading && mintPrice && (
-        <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+        <PageTransition delay={150}>
+          <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
           <p className="text-sm text-white/70">Mint Price</p>
           <p className="text-2xl font-bold text-white">
             {formatEther(mintPrice)} AVAX
           </p>
-        </div>
+          </div>
+        </PageTransition>
       )}
 
       {/* Submit Button */}
-      <button
+      <PageTransition delay={200}>
+        <button
         type="submit"
         disabled={!isFormValid || isLoading}
         className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600
@@ -164,16 +174,19 @@ export function MintForm() {
         ) : (
           "Mint NFT"
         )}
-      </button>
+        </button>
+      </PageTransition>
 
         {/* Success Modal */}
         <MintSuccessModal nft={mintedNFT} onClose={handleCloseModal} />
       </form>
 
       {/* Preview Section */}
-      <div className="lg:sticky lg:top-6 lg:self-start">
-        <NFTPreview formData={formData} />
-      </div>
+      <PageTransition delay={100}>
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <NFTPreview formData={formData} />
+        </div>
+      </PageTransition>
     </div>
   );
 }

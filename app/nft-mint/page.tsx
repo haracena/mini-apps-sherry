@@ -2,6 +2,7 @@
 
 import { PageHeader } from "@/components/PageHeader";
 import { MintForm } from "@/components/nft/MintForm";
+import { PageTransition } from "@/components/PageTransition";
 import { useAccount } from "wagmi";
 
 export default function NFTMintPage() {
@@ -10,12 +11,15 @@ export default function NFTMintPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black">
       <div className="container mx-auto px-4 py-8">
-        <PageHeader
-          title="Mint NFT"
-          description="Create your unique digital collectible on the blockchain"
-        />
+        <PageTransition>
+          <PageHeader
+            title="Mint NFT"
+            description="Create your unique digital collectible on the blockchain"
+          />
+        </PageTransition>
 
-        <div className="max-w-2xl mx-auto mt-8">
+        <PageTransition delay={100}>
+          <div className="max-w-2xl mx-auto mt-8">
           {!isConnected ? (
             <div className="bg-white/5 backdrop-blur-sm border border-purple-500/30 rounded-lg p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-purple-500/20 rounded-full flex items-center justify-center">
@@ -45,7 +49,8 @@ export default function NFTMintPage() {
               <MintForm />
             </div>
           )}
-        </div>
+          </div>
+        </PageTransition>
       </div>
     </div>
   );

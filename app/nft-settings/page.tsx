@@ -6,6 +6,7 @@ import { parseEther, formatEther } from "viem";
 import { toast } from "sonner";
 import { Wallet, DollarSign, TrendingUp, Package, Download } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
+import { PageTransition } from "@/components/PageTransition";
 import { useNFTOwner } from "@/hooks/useNFTOwner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CONTRACTS } from "@/config/contracts";
@@ -93,12 +94,15 @@ export default function NFTSettingsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black">
       <div className="container mx-auto px-4 py-8">
-        <PageHeader
-          title="NFT Settings"
-          description="Manage your NFT contract settings"
-        />
+        <PageTransition>
+          <PageHeader
+            title="NFT Settings"
+            description="Manage your NFT contract settings"
+          />
+        </PageTransition>
 
-        <div className="max-w-4xl mx-auto mt-8">
+        <PageTransition delay={100}>
+          <div className="max-w-4xl mx-auto mt-8">
           {!isConnected ? (
             <EmptyState
               icon={Wallet}
@@ -248,7 +252,8 @@ export default function NFTSettingsPage() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </PageTransition>
       </div>
     </div>
   );
