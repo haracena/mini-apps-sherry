@@ -10,15 +10,24 @@ import type { NFTMetadata } from "@/types";
 
 interface NFTCardProps {
   tokenId: bigint;
-  tokenURI: string;
 }
 
-function NFTCard({ tokenId, tokenURI }: NFTCardProps) {
+function NFTCard({ tokenId }: NFTCardProps) {
   const [metadata, setMetadata] = useState<NFTMetadata | null>(null);
   const [imageError, setImageError] = useState(false);
 
+  // Fetch tokenURI for this specific NFT
+  const { data: tokenURI } = useReadContract({
+    address: CONTRACTS.MINTABLE_NFT,
+    abi: MintableNFTABI,
+    functionName: "tokenURI",
+    args: [tokenId],
+  });
+
   useEffect(() => {
     const fetchMetadata = async () => {
+      if (!tokenURI) return;
+
       try {
         // Convert ipfs:// to gateway URL
         const gatewayUrl = tokenURI.replace(
@@ -101,16 +110,6 @@ export function NFTGallery() {
     },
   });
 
-  const { data: tokenURIs } = useReadContract({
-    address: CONTRACTS.MINTABLE_NFT,
-    abi: MintableNFTABI,
-    functionName: "tokenURI",
-    args: tokenIds && tokenIds.length > 0 ? [tokenIds[0]] : undefined,
-    query: {
-      enabled: !!tokenIds && tokenIds.length > 0,
-    },
-  });
-
   if (!isConnected) {
     return (
       <div className="text-center py-12">
@@ -164,11 +163,10 @@ export function NFTGallery() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {tokenIds.map((tokenId, index) => (
+      {tokenIds.map((tokenId) => (
         <NFTCard
           key={tokenId.toString()}
           tokenId={tokenId}
-          tokenURI={tokenURIs as string}
         />
       ))}
     </div>
