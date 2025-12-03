@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatEther } from "viem";
 import { ImageUpload } from "./ImageUpload";
+import { MintSuccessModal } from "./MintSuccessModal";
 import { useNFTMint } from "@/hooks/useNFTMint";
 import type { NFTFormData } from "@/types";
 
@@ -20,12 +21,22 @@ export function MintForm() {
     isMinting,
     isUploading,
     uploadError,
+    mintedNFT,
   } = useNFTMint();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.image) return;
     await mint(formData);
+  };
+
+  const handleCloseModal = () => {
+    // Reset form after successful mint
+    setFormData({
+      name: "",
+      description: "",
+      image: null,
+    });
   };
 
   const isFormValid =
@@ -128,6 +139,9 @@ export function MintForm() {
           "Mint NFT"
         )}
       </button>
+
+      {/* Success Modal */}
+      <MintSuccessModal nft={mintedNFT} onClose={handleCloseModal} />
     </form>
   );
 }
