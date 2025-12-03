@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
+import { fetchFromIPFS, getIPFSImageUrl } from "@/utils/ipfs";
 import type { NFTMetadata } from "@/types";
 
 interface NFTCardProps {
@@ -14,7 +15,9 @@ interface NFTCardProps {
 
 function NFTCard({ tokenId }: NFTCardProps) {
   const [metadata, setMetadata] = useState<NFTMetadata | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [imageError, setImageError] = useState(false);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
 
   // Fetch tokenURI for this specific NFT
   const { data: tokenURI } = useReadContract({
@@ -29,23 +32,29 @@ function NFTCard({ tokenId }: NFTCardProps) {
       if (!tokenURI) return;
 
       try {
-        // Convert ipfs:// to gateway URL
-        const gatewayUrl = tokenURI.replace(
-          "ipfs://",
-          "https://gateway.pinata.cloud/ipfs/"
-        );
-        const response = await fetch(gatewayUrl);
-        const data = await response.json();
+        setIsLoadingMetadata(true);
+
+        // Fetch metadata with automatic gateway fallback
+        const data = await fetchFromIPFS<NFTMetadata>(tokenURI);
         setMetadata(data);
+
+        // Get working image URL with gateway fallback
+        if (data.image) {
+          const workingImageUrl = await getIPFSImageUrl(data.image);
+          setImageUrl(workingImageUrl);
+        }
+
+        setIsLoadingMetadata(false);
       } catch (error) {
         console.error("Failed to fetch NFT metadata:", error);
+        setIsLoadingMetadata(false);
       }
     };
 
     fetchMetadata();
   }, [tokenURI]);
 
-  if (!metadata) {
+  if (!metadata || isLoadingMetadata) {
     return (
       <div className="bg-white/5 border border-purple-500/30 rounded-lg p-4 animate-pulse">
         <div className="aspect-square bg-white/10 rounded-lg mb-3" />
@@ -58,9 +67,9 @@ function NFTCard({ tokenId }: NFTCardProps) {
   return (
     <div className="bg-white/5 border border-purple-500/30 rounded-lg overflow-hidden hover:border-purple-500/50 transition-all duration-200 group">
       <div className="relative aspect-square">
-        {!imageError ? (
+        {!imageError && imageUrl ? (
           <Image
-            src={metadata.image}
+            src={imageUrl}
             alt={metadata.name}
             fill
             className="object-cover"
