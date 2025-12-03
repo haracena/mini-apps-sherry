@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import Image from "next/image";
+import Link from "next/link";
 import { ExternalLink, ImageIcon } from "lucide-react";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
@@ -60,7 +61,10 @@ export function NFTCard({ tokenId }: NFTCardProps) {
   }
 
   return (
-    <div className="group relative bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20">
+    <Link
+      href={`/nft/${tokenId.toString()}`}
+      className="group relative block bg-gradient-to-br from-white/5 to-white/[0.02] border border-purple-500/20 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 cursor-pointer"
+    >
       {/* Token ID Badge */}
       <div className="absolute top-3 right-3 z-10 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-purple-500/30">
         <span className="text-xs font-mono text-purple-300">
@@ -129,6 +133,7 @@ export function NFTCard({ tokenId }: NFTCardProps) {
             href={`https://snowtrace.io/token/${CONTRACTS.MINTABLE_NFT}?a=${tokenId}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors group/link"
           >
             <span className="text-xs font-medium">View</span>
@@ -141,6 +146,6 @@ export function NFTCard({ tokenId }: NFTCardProps) {
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-pink-500/0" />
       </div>
-    </div>
+    </Link>
   );
 }
