@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAccount, useReadContract, useWriteContract, useWatchContractEvent } from "wagmi";
 import { parseEther } from "viem";
+import imageCompression from "browser-image-compression";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
 import type { NFTFormData, MintedNFT } from "@/types";
@@ -10,6 +11,7 @@ import type { NFTFormData, MintedNFT } from "@/types";
 export function useNFTMint() {
   const { address } = useAccount();
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [mintedNFT, setMintedNFT] = useState<MintedNFT | null>(null);
 
@@ -43,21 +45,42 @@ export function useNFTMint() {
   });
 
   const uploadImage = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
+    setIsCompressing(true);
 
-    const response = await fetch("/api/nft/upload-image", {
-      method: "POST",
-      body: formData,
-    });
+    // Compress image before upload
+    const options = {
+      maxSizeMB: 2,
+      maxWidthOrHeight: 2048,
+      useWebWorker: true,
+      fileType: file.type as string,
+    };
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to upload image");
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Original size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`Compressed size: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+
+      setIsCompressing(false);
+
+      const formData = new FormData();
+      formData.append("file", compressedFile, file.name);
+
+      const response = await fetch("/api/nft/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload image");
+      }
+
+      const data = await response.json();
+      return data.imageUrl;
+    } catch (error) {
+      setIsCompressing(false);
+      throw error;
     }
-
-    const data = await response.json();
-    return data.imageUrl;
   };
 
   const uploadMetadata = async (
@@ -130,6 +153,7 @@ export function useNFTMint() {
     isPriceLoading,
     isMinting,
     isUploading,
+    isCompressing,
     uploadError,
     mintedNFT,
   };

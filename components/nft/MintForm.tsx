@@ -20,6 +20,7 @@ export function MintForm() {
     isPriceLoading,
     isMinting,
     isUploading,
+    isCompressing,
     uploadError,
     mintedNFT,
   } = useNFTMint();
@@ -44,7 +45,7 @@ export function MintForm() {
     formData.description.trim() !== "" &&
     formData.image !== null;
 
-  const isLoading = isMinting || isUploading;
+  const isLoading = isMinting || isUploading || isCompressing;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -133,7 +134,11 @@ export function MintForm() {
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
             <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-            {isUploading ? "Uploading to IPFS..." : "Minting NFT..."}
+            {isCompressing
+              ? "Compressing image..."
+              : isUploading
+              ? "Uploading to IPFS..."
+              : "Minting NFT..."}
           </span>
         ) : (
           "Mint NFT"
