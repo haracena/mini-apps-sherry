@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useReadContract, useAccount } from "wagmi";
 import Image from "next/image";
-import { ArrowLeft, ExternalLink, Package, User } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, User, Download } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageTransition } from "@/components/PageTransition";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -71,6 +71,25 @@ export default function NFTDetailPage() {
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
   const explorerUrl = `https://testnet.snowtrace.io/address/${CONTRACTS.MINTABLE_NFT}?tab=inventory`;
+
+  const handleDownload = async () => {
+    if (!imageUrl || !metadata?.name) return;
+
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${metadata.name.replace(/[^a-z0-9]/gi, "_")}_${tokenId}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black">
@@ -204,18 +223,28 @@ export default function NFTDetailPage() {
 
                 {/* Links */}
                 <PageTransition delay={350}>
-                  <div className="flex gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center justify-center gap-2 px-4 py-3
+                               bg-white/5 hover:bg-white/10 border border-purple-500/30
+                               text-white/70 hover:text-white rounded-lg
+                               transition-all duration-200"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span className="text-sm font-medium">Download</span>
+                    </button>
                     <a
                       href={explorerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3
+                      className="flex items-center justify-center gap-2 px-4 py-3
                                bg-white/5 hover:bg-white/10 border border-purple-500/30
                                text-white/70 hover:text-white rounded-lg
                                transition-all duration-200"
                     >
                       <ExternalLink className="w-4 h-4" />
-                      <span className="text-sm font-medium">View on Explorer</span>
+                      <span className="text-sm font-medium">Explorer</span>
                     </a>
                   </div>
                 </PageTransition>
