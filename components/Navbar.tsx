@@ -45,6 +45,18 @@ export default function Navbar() {
           >
             My NFTs
           </Link>
+          <Link
+            href="/nft-stats"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            NFT Stats
+          </Link>
+          <Link
+            href="/nft-settings"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            Settings
+          </Link>
         </div>
         <div className="flex items-center gap-4">
           {user ? (
