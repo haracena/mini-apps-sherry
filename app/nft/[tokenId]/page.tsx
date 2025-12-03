@@ -8,6 +8,7 @@ import { ArrowLeft, ExternalLink, Package, User, Download } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageTransition } from "@/components/PageTransition";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { ShareMenu } from "@/components/nft/ShareMenu";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
 import { fetchFromIPFS, getIPFSImageUrl } from "@/utils/ipfs";
@@ -71,6 +72,7 @@ export default function NFTDetailPage() {
 
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
   const explorerUrl = `https://testnet.snowtrace.io/address/${CONTRACTS.MINTABLE_NFT}?tab=inventory`;
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const handleDownload = async () => {
     if (!imageUrl || !metadata?.name) return;
@@ -221,9 +223,9 @@ export default function NFTDetailPage() {
                   </div>
                 </PageTransition>
 
-                {/* Links */}
+                {/* Actions */}
                 <PageTransition delay={350}>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={handleDownload}
                       className="flex items-center justify-center gap-2 px-4 py-3
@@ -234,6 +236,13 @@ export default function NFTDetailPage() {
                       <Download className="w-4 h-4" />
                       <span className="text-sm font-medium">Download</span>
                     </button>
+
+                    <ShareMenu
+                      nftName={metadata?.name || "NFT"}
+                      tokenId={tokenId}
+                      shareUrl={shareUrl}
+                    />
+
                     <a
                       href={explorerUrl}
                       target="_blank"
