@@ -1,0 +1,21 @@
+[project]
+name = "social-triggers"
+description = "Multi-chain mini-apps platform with daily streak and NFT collection on Stacks"
+authors = ["Social Triggers Team"]
+telemetry = false
+cache_dir = ".cache"
+requirements = []
+
+[contracts.daily-streak]
+path = "contracts/clarity/daily-streak.clar"
+clarity_version = 2
+epoch = 2.5
+
+[contracts.nft-collection]
+path = "contracts/clarity/nft-collection.clar"
+clarity_version = 2
+epoch = 2.5
+
+[repl]
+costs_version = 3
+parser_version = 2

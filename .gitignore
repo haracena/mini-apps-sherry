@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Clarinet (Stacks)
+.cache/
+.clarinet/
+settings/Devnet.toml
+settings/Testnet.toml
+settings/Mainnet.toml
