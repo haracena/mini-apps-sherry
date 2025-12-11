@@ -49,3 +49,40 @@
     (nft-transfer? sherry-nft token-id sender recipient)
   )
 )
+
+;; Mint function with Clarity 4 enhancements
+(define-public (mint (name (string-utf8 64)) (uri (string-ascii 256)))
+  (let
+    (
+      (token-id (+ (var-get last-token-id) u1))
+      (price (var-get mint-price))
+    )
+    ;; Check payment
+    (try! (stx-transfer? price tx-sender contract-owner))
+
+    ;; Mint NFT
+    (try! (nft-mint? sherry-nft token-id tx-sender))
+
+    ;; Store metadata using Clarity 4 block-height
+    (map-set token-metadata token-id {
+      uri: uri,
+      name: name,
+      created-at: block-height
+    })
+
+    ;; Update last token ID
+    (var-set last-token-id token-id)
+
+    (ok token-id)
+  )
+)
+
+;; Set mint price (owner only)
+(define-public (set-mint-price (new-price uint))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (asserts! (> new-price u0) err-invalid-price)
+    (var-set mint-price new-price)
+    (ok true)
+  )
+)
