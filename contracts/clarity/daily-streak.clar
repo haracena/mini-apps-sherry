@@ -108,3 +108,53 @@
     )
   )
 )
+
+;; Read-only functions using Clarity 4 features
+
+;; Get player data with string conversion using Clarity 4
+(define-read-only (get-player-info (player principal))
+  (map-get? player-data player)
+)
+
+;; Get player points as string (Clarity 4 uint-to-string)
+(define-read-only (get-points-as-string (player principal))
+  (match (map-get? player-data player)
+    player-info (some (uint-to-string (get points player-info)))
+    none
+  )
+)
+
+;; Get current streak with enhanced formatting
+(define-read-only (get-streak (player principal))
+  (match (map-get? player-data player)
+    player-info (ok (get current-streak player-info))
+    (ok u0)
+  )
+)
+
+;; Check if player can spin today
+(define-read-only (can-spin-today (player principal))
+  (let
+    (
+      (current-day (get-current-day))
+      (player-info (map-get? player-data player))
+    )
+    (match player-info
+      info (not (is-eq current-day (get last-spin-day info)))
+      true  ;; New player can spin
+    )
+  )
+)
+
+;; Get total points distributed globally
+(define-read-only (get-total-points-distributed)
+  (ok (var-get total-points-distributed))
+)
+
+;; Get formatted streak info as string (Clarity 4)
+(define-read-only (get-streak-as-string (player principal))
+  (match (map-get? player-data player)
+    player-info (some (uint-to-string (get current-streak player-info)))
+    none
+  )
+)
