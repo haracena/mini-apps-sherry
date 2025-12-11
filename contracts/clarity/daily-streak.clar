@@ -10,3 +10,17 @@
 
 ;; Daily spin reset time (midnight UTC in seconds since epoch)
 (define-constant seconds-per-day u86400)
+
+;; Data variables
+(define-map player-data
+  principal
+  {
+    points: uint,
+    last-spin-day: uint,
+    current-streak: uint,
+    total-spins: uint
+  }
+)
+
+;; Track total points distributed
+(define-data-var total-points-distributed uint u0)
