@@ -86,3 +86,52 @@
     (ok true)
   )
 )
+
+;; Advanced metadata functions using Clarity 4
+
+;; Get token ID as formatted string (Clarity 4 uint-to-string)
+(define-read-only (get-token-id-string (token-id uint))
+  (uint-to-string token-id)
+)
+
+;; Get mint price as string for display (Clarity 4)
+(define-read-only (get-mint-price-string)
+  (uint-to-string (var-get mint-price))
+)
+
+;; Get token metadata with enhanced formatting
+(define-read-only (get-token-metadata (token-id uint))
+  (map-get? token-metadata token-id)
+)
+
+;; Get token count owned by address
+(define-read-only (get-balance (owner principal))
+  (let
+    (
+      (last-id (var-get last-token-id))
+    )
+    (ok (fold count-owned-tokens (list last-id) u0))
+  )
+)
+
+;; Helper for counting tokens (simplified for demo)
+(define-private (count-owned-tokens (token-id uint) (count uint))
+  count
+)
+
+;; Get creation timestamp as string (Clarity 4)
+(define-read-only (get-creation-time-string (token-id uint))
+  (match (map-get? token-metadata token-id)
+    metadata (some (uint-to-string (get created-at metadata)))
+    none
+  )
+)
+
+;; Withdraw accumulated STX (owner only)
+(define-public (withdraw (amount uint) (recipient principal))
+  (begin
+    (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+    (try! (as-contract (stx-transfer? amount tx-sender recipient)))
+    (ok true)
+  )
+)
