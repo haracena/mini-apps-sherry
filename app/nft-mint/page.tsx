@@ -4,9 +4,23 @@ import { PageHeader } from "@/components/PageHeader";
 import { MintForm } from "@/components/nft/MintForm";
 import { PageTransition } from "@/components/PageTransition";
 import { useAccount } from "wagmi";
+import { useStacksWallet } from "@/hooks/useStacksWallet";
+import { NetworkSelector, useNetworkSelector } from "@/components/NetworkSelector";
 
 export default function NFTMintPage() {
-  const { isConnected } = useAccount();
+  // Network selection
+  const { network } = useNetworkSelector();
+  const isAvalanche = network === "avalanche";
+  const isStacks = network === "stacks";
+
+  // Avalanche state
+  const { isConnected: isAvalancheConnected } = useAccount();
+
+  // Stacks state
+  const { isConnected: isStacksConnected } = useStacksWallet();
+
+  // Unified connection state based on selected network
+  const isConnected = isAvalanche ? isAvalancheConnected : isStacksConnected;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black">
@@ -16,6 +30,13 @@ export default function NFTMintPage() {
             title="Mint NFT"
             description="Create your unique digital collectible on the blockchain"
           />
+        </PageTransition>
+
+        {/* Network Selector */}
+        <PageTransition delay={50}>
+          <div className="flex justify-center mb-6">
+            <NetworkSelector />
+          </div>
         </PageTransition>
 
         <PageTransition delay={100}>
@@ -46,7 +67,7 @@ export default function NFTMintPage() {
             </div>
           ) : (
             <div className="bg-white/5 backdrop-blur-sm border border-purple-500/30 rounded-lg p-6 md:p-8">
-              <MintForm />
+              <MintForm network={network} />
             </div>
           )}
           </div>
