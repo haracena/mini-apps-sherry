@@ -6,7 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clarity:check": "clarinet check",
+    "clarity:test": "clarinet test",
+    "clarity:console": "clarinet console",
+    "clarity:deploy:testnet": "clarinet deploy --testnet",
+    "clarity:deploy:mainnet": "clarinet deploy --mainnet",
+    "stacks:explorer:testnet": "open https://explorer.hiro.so/?chain=testnet",
+    "stacks:explorer:mainnet": "open https://explorer.stacks.co"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
