@@ -10,37 +10,77 @@ import { Confetti } from "@/components/Confetti";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDailyStreak } from "@/hooks/useDailyStreak";
+import { useDailyStreakStacks } from "@/hooks/useDailyStreakStacks";
+import { useStacksWallet } from "@/hooks/useStacksWallet";
+import { NetworkSelector, useNetworkSelector } from "@/components/NetworkSelector";
+import { StacksTransactionStatus } from "@/components/StacksTransactionStatus";
 import { calculateWinRotation } from "@/config/wheel-prizes";
 import { DailyStreakABI } from "@/abi/DailyStreak";
 import { CONTRACTS } from "@/config/contracts";
 import { Loader2, Wallet } from "lucide-react";
 
 export default function DailyStreakPage() {
-  const { isConnected, address } = useAccount();
+  // Network selection
+  const { network, setNetwork } = useNetworkSelector();
+  const isAvalanche = network === "avalanche";
+  const isStacks = network === "stacks";
+
+  // Avalanche state
+  const { isConnected: isAvalancheConnected, address: avalancheAddress } = useAccount();
   const {
-    totalPoints,
-    currentStreak,
-    canSpin,
-    timeUntilNextSpin,
-    hasActiveStreak,
-    spin,
-    isSpinning,
-    transactionHash,
-    refetch,
+    totalPoints: avalancheTotalPoints,
+    currentStreak: avalancheCurrentStreak,
+    canSpin: avalancheCanSpin,
+    timeUntilNextSpin: avalancheTimeUntilNextSpin,
+    hasActiveStreak: avalancheHasActiveStreak,
+    spin: avalancheSpin,
+    isSpinning: avalancheIsSpinning,
+    transactionHash: avalancheTransactionHash,
+    refetch: avalancheRefetch,
   } = useDailyStreak();
+
+  // Stacks state
+  const {
+    address: stacksAddress,
+    isConnected: isStacksConnected,
+  } = useStacksWallet();
+
+  const {
+    totalPoints: stacksTotalPoints,
+    currentStreak: stacksCurrentStreak,
+    canSpin: stacksCanSpin,
+    timeUntilNextSpin: stacksTimeUntilNextSpin,
+    hasActiveStreak: stacksHasActiveStreak,
+    spin: stacksSpin,
+    isSpinning: stacksIsSpinning,
+    transactionHash: stacksTransactionHash,
+    refetch: stacksRefetch,
+  } = useDailyStreakStacks();
+
+  // Unified state based on selected network
+  const isConnected = isAvalanche ? isAvalancheConnected : isStacksConnected;
+  const address = isAvalanche ? avalancheAddress : stacksAddress;
+  const totalPoints = isAvalanche ? avalancheTotalPoints : stacksTotalPoints;
+  const currentStreak = isAvalanche ? avalancheCurrentStreak : stacksCurrentStreak;
+  const canSpin = isAvalanche ? avalancheCanSpin : stacksCanSpin;
+  const timeUntilNextSpin = isAvalanche ? avalancheTimeUntilNextSpin : stacksTimeUntilNextSpin;
+  const hasActiveStreak = isAvalanche ? avalancheHasActiveStreak : stacksHasActiveStreak;
+  const isSpinning = isAvalanche ? avalancheIsSpinning : stacksIsSpinning;
+  const transactionHash = isAvalanche ? avalancheTransactionHash : stacksTransactionHash;
 
   const [rotation, setRotation] = useState(0);
   const [wonPoints, setWonPoints] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Watch for SpinCompleted event
+  // Watch for SpinCompleted event (Avalanche only)
   useWatchContractEvent({
     address: CONTRACTS.DAILY_STREAK,
     abi: DailyStreakABI,
     eventName: "SpinCompleted",
+    enabled: isAvalanche,
     onLogs(logs) {
       logs.forEach((log) => {
-        if (log.args.player?.toLowerCase() === address?.toLowerCase()) {
+        if (log.args.player?.toLowerCase() === avalancheAddress?.toLowerCase()) {
           const points = Number(log.args.points);
           simulateWin(points);
         }
@@ -52,12 +92,19 @@ export default function DailyStreakPage() {
     if (!canSpin || isSpinning) return;
 
     try {
-      await spin();
-
-      // Refetch data after spin
-      setTimeout(() => {
-        refetch();
-      }, 2000);
+      if (isAvalanche) {
+        await avalancheSpin();
+        // Refetch data after spin
+        setTimeout(() => {
+          avalancheRefetch();
+        }, 2000);
+      } else {
+        await stacksSpin();
+        // Refetch data after spin
+        setTimeout(() => {
+          stacksRefetch();
+        }, 2000);
+      }
     } catch (error) {
       console.error("Spin failed:", error);
     }
@@ -95,11 +142,16 @@ export default function DailyStreakPage() {
     <div className="container max-w-6xl mx-auto px-4 py-8">
       <div className="space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Daily Streak Wheel</h1>
           <p className="text-muted-foreground">
             Spin once every 24 hours to earn points and build your streak!
           </p>
+
+          {/* Network Selector */}
+          <div className="flex justify-center">
+            <NetworkSelector />
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -114,7 +166,10 @@ export default function DailyStreakPage() {
 
           {/* Countdown or Spin Button */}
           {!canSpin && timeUntilNextSpin > BigInt(0) && (
-            <CountdownTimer seconds={timeUntilNextSpin} onComplete={refetch} />
+            <CountdownTimer
+              seconds={timeUntilNextSpin}
+              onComplete={isAvalanche ? avalancheRefetch : stacksRefetch}
+            />
           )}
 
           {canSpin && (
@@ -136,13 +191,18 @@ export default function DailyStreakPage() {
           )}
 
           {/* Transaction Info */}
-          {transactionHash && (
+          {isAvalanche && transactionHash && (
             <Alert className="max-w-md">
               <AlertDescription className="text-xs">
                 Transaction: {transactionHash.slice(0, 10)}...
                 {transactionHash.slice(-8)}
               </AlertDescription>
             </Alert>
+          )}
+
+          {/* Stacks Transaction Status */}
+          {isStacks && transactionHash && (
+            <StacksTransactionStatus txId={transactionHash} />
           )}
         </div>
 
@@ -164,6 +224,16 @@ export default function DailyStreakPage() {
             <li>• Build your streak by playing consecutive days</li>
             <li>• Missing a day will reset your streak to 0</li>
             <li>• Points and streaks are stored on-chain</li>
+            <li>
+              • Multi-chain support: Play on{" "}
+              <span className="font-semibold text-foreground">Avalanche</span> or{" "}
+              <span className="font-semibold text-foreground">Stacks</span>
+            </li>
+            {isStacks && (
+              <li>
+                • Stacks blockchain: Data secured by Bitcoin, powered by Clarity smart contracts
+              </li>
+            )}
           </ul>
         </div>
       </div>
