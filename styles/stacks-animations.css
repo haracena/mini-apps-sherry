@@ -1,0 +1,341 @@
+/**
+ * Stacks Component Animations
+ * Custom animations for Stacks blockchain UI components
+ */
+
+/* Transaction Status Animations */
+@keyframes pulse-success {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulse-pending {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.stacks-tx-success {
+  animation: pulse-success 2s ease-in-out;
+}
+
+.stacks-tx-pending {
+  animation: pulse-pending 1.5s ease-in-out infinite;
+}
+
+/* Blockchain Data Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.stacks-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Wallet Connection Animation */
+@keyframes wallet-connect {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.stacks-wallet-connect {
+  animation: wallet-connect 0.3s ease-out;
+}
+
+/* Balance Update Animation */
+@keyframes balance-update {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(0.95);
+  }
+}
+
+.stacks-balance-update {
+  animation: balance-update 0.5s ease-in-out;
+}
+
+/* NFT Card Hover */
+@keyframes nft-hover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
+}
+
+.stacks-nft-card:hover {
+  animation: nft-hover 0.2s ease-out forwards;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Contract Call Processing */
+@keyframes processing {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.stacks-processing {
+  animation: processing 1s linear infinite;
+}
+
+/* Leaderboard Rank Animation */
+@keyframes rank-change {
+  0% {
+    background-color: rgba(var(--primary-rgb), 0.1);
+  }
+  50% {
+    background-color: rgba(var(--primary-rgb), 0.3);
+  }
+  100% {
+    background-color: rgba(var(--primary-rgb), 0.1);
+  }
+}
+
+.stacks-rank-change {
+  animation: rank-change 1s ease-in-out;
+}
+
+/* Network Switch Animation */
+@keyframes network-switch {
+  0% {
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: rotateY(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg);
+  }
+}
+
+.stacks-network-switch {
+  animation: network-switch 0.5s ease-in-out;
+}
+
+/* Toast Notification Slide In */
+@keyframes toast-slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.stacks-toast {
+  animation: toast-slide-in 0.3s ease-out;
+}
+
+/* Loading Dots */
+@keyframes loading-dots {
+  0%, 20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.stacks-loading-dot {
+  animation: loading-dots 1.4s infinite;
+}
+
+.stacks-loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.stacks-loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Block Confirmation Animation */
+@keyframes block-confirm {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.stacks-block-progress {
+  animation: block-confirm 2s ease-in-out;
+}
+
+/* Success Checkmark */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.stacks-checkmark {
+  stroke-dasharray: 100;
+  animation: checkmark 0.5s ease-in-out forwards;
+}
+
+/* Error Shake */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+.stacks-error-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Fade In */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.stacks-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+/* Slide Up */
+@keyframes slide-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.stacks-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* Scale In */
+@keyframes scale-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.stacks-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Skeleton Pulse */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.stacks-skeleton {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Transaction List Entry */
+@keyframes tx-entry {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.stacks-tx-entry {
+  animation: tx-entry 0.3s ease-out;
+}
+
+/* Utility Classes */
+.stacks-transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.stacks-transition-colors {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.stacks-transition-transform {
+  transition: transform 0.2s ease-in-out;
+}
+
+.stacks-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stacks-hover-glow:hover {
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
+}
