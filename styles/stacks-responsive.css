@@ -1,0 +1,250 @@
+/**
+ * Stacks Component Responsive Styles
+ * Mobile-first responsive design for Stacks blockchain components
+ */
+
+/* Transaction History Responsive */
+.stacks-transaction-history {
+  @apply w-full;
+}
+
+@media (max-width: 640px) {
+  .stacks-transaction-item {
+    @apply flex-col gap-2 p-3;
+  }
+
+  .stacks-transaction-meta {
+    @apply flex-col items-start gap-1;
+  }
+
+  .stacks-transaction-hash {
+    @apply text-xs;
+  }
+}
+
+/* Leaderboard Responsive */
+.stacks-leaderboard-entry {
+  @apply grid grid-cols-[auto_1fr_auto] gap-3;
+}
+
+@media (max-width: 640px) {
+  .stacks-leaderboard-entry {
+    @apply grid-cols-[auto_1fr] gap-2;
+  }
+
+  .stacks-leaderboard-points {
+    @apply col-span-2 justify-self-end;
+  }
+}
+
+/* Stats Dashboard Responsive */
+.stacks-stats-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+@media (max-width: 768px) {
+  .stacks-stat-card {
+    @apply flex-row justify-between;
+  }
+
+  .stacks-stat-value {
+    @apply text-xl;
+  }
+}
+
+/* Wallet Switcher Responsive */
+.stacks-wallet-grid {
+  @apply grid grid-cols-1 gap-3;
+}
+
+@media (min-width: 768px) {
+  .stacks-wallet-grid {
+    @apply grid-cols-2;
+  }
+}
+
+/* Contract Explorer Responsive */
+.stacks-contract-details {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+@media (max-width: 1024px) {
+  .stacks-contract-code {
+    @apply overflow-x-auto text-xs;
+  }
+}
+
+/* NFT Gallery Responsive */
+.stacks-nft-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+@media (max-width: 640px) {
+  .stacks-nft-card {
+    @apply flex flex-row gap-3;
+  }
+
+  .stacks-nft-image {
+    @apply w-24 h-24;
+  }
+}
+
+/* Modal Responsive */
+@media (max-width: 640px) {
+  .stacks-modal-content {
+    @apply max-w-full w-full mx-4;
+  }
+
+  .stacks-modal-footer {
+    @apply flex-col gap-2;
+  }
+
+  .stacks-modal-button {
+    @apply w-full;
+  }
+}
+
+/* Network Selector Responsive */
+.stacks-network-selector {
+  @apply flex flex-col sm:flex-row gap-2;
+}
+
+@media (max-width: 640px) {
+  .stacks-network-badge {
+    @apply w-full justify-center;
+  }
+}
+
+/* Address Display Responsive */
+.stacks-address {
+  @apply font-mono text-sm;
+}
+
+@media (max-width: 640px) {
+  .stacks-address-full {
+    @apply hidden;
+  }
+
+  .stacks-address-short {
+    @apply inline;
+  }
+}
+
+@media (min-width: 641px) {
+  .stacks-address-full {
+    @apply inline;
+  }
+
+  .stacks-address-short {
+    @apply hidden;
+  }
+}
+
+/* Settings Page Responsive */
+.stacks-settings-grid {
+  @apply grid grid-cols-1 gap-6;
+}
+
+@media (min-width: 768px) {
+  .stacks-settings-item {
+    @apply flex-row items-center justify-between;
+  }
+}
+
+@media (max-width: 767px) {
+  .stacks-settings-item {
+    @apply flex-col items-start gap-3;
+  }
+
+  .stacks-settings-control {
+    @apply w-full;
+  }
+}
+
+/* Transaction Confirmation Modal Responsive */
+@media (max-width: 640px) {
+  .stacks-tx-confirm-details {
+    @apply text-xs;
+  }
+
+  .stacks-tx-confirm-actions {
+    @apply flex-col-reverse gap-2;
+  }
+}
+
+/* Balance Display Responsive */
+.stacks-balance-large {
+  @apply text-3xl lg:text-4xl font-bold;
+}
+
+.stacks-balance-small {
+  @apply text-xl lg:text-2xl;
+}
+
+/* Loading States */
+.stacks-skeleton-mobile {
+  @apply h-16 w-full;
+}
+
+@media (min-width: 640px) {
+  .stacks-skeleton-mobile {
+    @apply h-24;
+  }
+}
+
+/* Explorer Page Responsive */
+.stacks-explorer-search {
+  @apply flex flex-col sm:flex-row gap-3;
+}
+
+@media (max-width: 640px) {
+  .stacks-explorer-search input {
+    @apply w-full;
+  }
+
+  .stacks-explorer-search button {
+    @apply w-full;
+  }
+}
+
+/* Utility Classes */
+.stacks-responsive-text {
+  @apply text-sm md:text-base lg:text-lg;
+}
+
+.stacks-responsive-heading {
+  @apply text-xl md:text-2xl lg:text-3xl;
+}
+
+.stacks-responsive-padding {
+  @apply p-3 md:p-4 lg:p-6;
+}
+
+.stacks-responsive-gap {
+  @apply gap-2 md:gap-4 lg:gap-6;
+}
+
+/* Hide on Mobile */
+.stacks-hide-mobile {
+  @apply hidden sm:block;
+}
+
+/* Show only on Mobile */
+.stacks-show-mobile {
+  @apply block sm:hidden;
+}
+
+/* Compact Mode */
+@media (max-width: 640px) {
+  .stacks-compact-mode {
+    @apply space-y-2;
+  }
+
+  .stacks-compact-mode .stacks-icon {
+    @apply w-4 h-4;
+  }
+
+  .stacks-compact-mode .stacks-text {
+    @apply text-xs;
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAccount, useReadContract } from "wagmi";
+import { useStacksWallet } from "@/hooks/useStacksWallet";
 import { Wallet, ImagePlus } from "lucide-react";
 import { CONTRACTS } from "@/config/contracts";
 import { MintableNFTABI } from "@/abi/MintableNFT";
@@ -22,23 +23,60 @@ interface NFTWithMetadata {
 
 const ITEMS_PER_PAGE = 12;
 
-export function NFTGallery() {
-  const { address, isConnected } = useAccount();
+interface NFTGalleryProps {
+  network: "avalanche" | "stacks";
+}
+
+export function NFTGallery({ network }: NFTGalleryProps) {
+  const isAvalanche = network === "avalanche";
+  const isStacks = network === "stacks";
+
+  // Avalanche state
+  const { address: avalancheAddress, isConnected: isAvalancheConnected } = useAccount();
+
+  // Stacks state
+  const { address: stacksAddress, isConnected: isStacksConnected } = useStacksWallet();
+
+  // Unified state
+  const address = isAvalanche ? avalancheAddress : stacksAddress;
+  const isConnected = isAvalanche ? isAvalancheConnected : isStacksConnected;
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [nftMetadata, setNftMetadata] = useState<NFTWithMetadata[]>([]);
 
-  const { data: tokenIds, isLoading } = useReadContract({
+  // Fetch Avalanche NFTs
+  const { data: avalancheTokenIds, isLoading: avalancheIsLoading } = useReadContract({
     address: CONTRACTS.MINTABLE_NFT,
     abi: MintableNFTABI,
     functionName: "tokensOfOwner",
-    args: address ? [address] : undefined,
+    args: avalancheAddress ? [avalancheAddress] : undefined,
     query: {
-      enabled: !!address,
+      enabled: !!avalancheAddress && isAvalanche,
     },
   });
+
+  // TODO: Fetch Stacks NFTs - placeholder for now
+  const [stacksTokenIds, setStacksTokenIds] = useState<bigint[]>([]);
+  const [stacksIsLoading, setStacksIsLoading] = useState(false);
+
+  // Fetch Stacks NFTs when needed
+  useEffect(() => {
+    if (isStacks && stacksAddress) {
+      setStacksIsLoading(true);
+      // TODO: Implement Stacks NFT fetching
+      // For now, return empty array
+      setTimeout(() => {
+        setStacksTokenIds([]);
+        setStacksIsLoading(false);
+      }, 500);
+    }
+  }, [isStacks, stacksAddress]);
+
+  // Unified state
+  const tokenIds = isAvalanche ? avalancheTokenIds : stacksTokenIds;
+  const isLoading = isAvalanche ? avalancheIsLoading : stacksIsLoading;
 
   // Fetch metadata for all NFTs
   useEffect(() => {

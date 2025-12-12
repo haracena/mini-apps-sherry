@@ -10,10 +10,18 @@ import { NFTPreview } from "./NFTPreview";
 import { AttributeBuilder } from "./AttributeBuilder";
 import { PageTransition } from "@/components/PageTransition";
 import { useNFTMint } from "@/hooks/useNFTMint";
+import { useNFTMintStacks } from "@/hooks/useNFTMintStacks";
 import { useNetworkCheck } from "@/hooks/useNetworkCheck";
+import { StacksTransactionStatus } from "@/components/StacksTransactionStatus";
 import type { NFTFormData } from "@/types";
 
-export function MintForm() {
+interface MintFormProps {
+  network: "avalanche" | "stacks";
+}
+
+export function MintForm({ network }: MintFormProps) {
+  const isAvalanche = network === "avalanche";
+  const isStacks = network === "stacks";
   const [formData, setFormData] = useState<NFTFormData>({
     name: "",
     description: "",
@@ -21,17 +29,32 @@ export function MintForm() {
     attributes: [],
   });
 
+  // Avalanche hooks
   const {
-    mint,
-    mintPrice,
-    isPriceLoading,
-    isMinting,
-    isUploading,
-    isCompressing,
-    retryCount,
-    uploadError,
-    mintedNFT,
+    mint: avalancheMint,
+    mintPrice: avalancheMintPrice,
+    isPriceLoading: avalancheIsPriceLoading,
+    isMinting: avalancheIsMinting,
+    isUploading: avalancheIsUploading,
+    isCompressing: avalancheIsCompressing,
+    retryCount: avalancheRetryCount,
+    uploadError: avalancheUploadError,
+    mintedNFT: avalancheMintedNFT,
   } = useNFTMint();
+
+  // Stacks hooks
+  const {
+    mint: stacksMint,
+    mintPrice: stacksMintPrice,
+    isPriceLoading: stacksIsPriceLoading,
+    isMinting: stacksIsMinting,
+    isUploading: stacksIsUploading,
+    isCompressing: stacksIsCompressing,
+    retryCount: stacksRetryCount,
+    uploadError: stacksUploadError,
+    mintedNFT: stacksMintedNFT,
+    transactionHash: stacksTransactionHash,
+  } = useNFTMintStacks();
 
   const {
     needsNetworkSwitch,
@@ -39,6 +62,17 @@ export function MintForm() {
     switchToAvalanche,
     isSwitching,
   } = useNetworkCheck();
+
+  // Unified state based on selected network
+  const mint = isAvalanche ? avalancheMint : stacksMint;
+  const mintPrice = isAvalanche ? avalancheMintPrice : stacksMintPrice;
+  const isPriceLoading = isAvalanche ? avalancheIsPriceLoading : stacksIsPriceLoading;
+  const isMinting = isAvalanche ? avalancheIsMinting : stacksIsMinting;
+  const isUploading = isAvalanche ? avalancheIsUploading : stacksIsUploading;
+  const isCompressing = isAvalanche ? avalancheIsCompressing : stacksIsCompressing;
+  const retryCount = isAvalanche ? avalancheRetryCount : stacksRetryCount;
+  const uploadError = isAvalanche ? avalancheUploadError : stacksUploadError;
+  const mintedNFT = isAvalanche ? avalancheMintedNFT : stacksMintedNFT;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,8 +120,8 @@ export function MintForm() {
 
   return (
     <div className="space-y-6">
-      {/* Network Warning Banner */}
-      {needsNetworkSwitch && (
+      {/* Network Warning Banner (Avalanche only) */}
+      {isAvalanche && needsNetworkSwitch && (
         <PageTransition>
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
             <div className="flex items-start gap-3">
@@ -194,12 +228,16 @@ export function MintForm() {
             <div>
               <p className="text-sm text-white/70">Mint Price</p>
               <p className="text-2xl font-bold text-white">
-                {formatEther(mintPrice)} AVAX
+                {isAvalanche
+                  ? `${formatEther(mintPrice)} AVAX`
+                  : `${(Number(mintPrice) / 1_000_000).toFixed(2)} STX`}
               </p>
             </div>
             <div className="pt-3 border-t border-white/10">
               <p className="text-xs text-white/50">Estimated Gas Fee</p>
-              <p className="text-sm text-white/70">~0.001 AVAX</p>
+              <p className="text-sm text-white/70">
+                {isAvalanche ? "~0.001 AVAX" : "~0.0001 STX"}
+              </p>
             </div>
           </div>
         </PageTransition>
@@ -209,7 +247,11 @@ export function MintForm() {
       <PageTransition delay={200}>
         <button
         type="submit"
-        disabled={!isFormValid || isLoading || needsNetworkSwitch}
+        disabled={
+          !isFormValid ||
+          isLoading ||
+          (isAvalanche && needsNetworkSwitch)
+        }
         className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600
                  text-white font-semibold rounded-lg
                  hover:from-purple-700 hover:to-pink-700
@@ -236,6 +278,13 @@ export function MintForm() {
 
         {/* Success Modal */}
         <MintSuccessModal nft={mintedNFT} onClose={handleCloseModal} />
+
+        {/* Stacks Transaction Status */}
+        {isStacks && stacksTransactionHash && (
+          <div className="mt-4">
+            <StacksTransactionStatus txId={stacksTransactionHash} />
+          </div>
+        )}
       </form>
 
       {/* Preview Section */}
